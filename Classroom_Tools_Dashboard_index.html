@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#a71930">
+  <meta name="description" content="A quick-launch dashboard for classroom tools and activities.">
+  <title>Classroom Tools | Nipher</title>
+  <style>
+    :root { color-scheme: light; --red:#a71930; --red-dark:#831226; --ink:#1f2937; --muted:#5b6472; --line:#e7e9ee; --paper:#fff; --page:#f6f7fa; --ring:#a71930; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--page); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); line-height:1.5; }
+    a { color:inherit; }
+    .hero { background:linear-gradient(125deg,#881327,#bd243d); color:white; padding:46px 20px 52px; }
+    .wrap { max-width:1050px; margin:auto; }
+    .eyebrow { font-size:.82rem; font-weight:800; text-transform:uppercase; letter-spacing:.16em; opacity:.9; margin:0 0 10px; }
+    h1 { font-size:clamp(2rem,5vw,3.5rem); line-height:1.08; letter-spacing:-.035em; margin:0 0 12px; }
+    .subtitle { max-width:650px; font-size:1.08rem; opacity:.94; margin:0; }
+    main { padding:28px 20px 55px; }
+    .bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:21px; }
+    h2 { font-size:1.32rem; margin:0; }
+    .count { color:var(--muted); font-size:.92rem; margin:2px 0 0; }
+    .search { min-width:min(100%,280px); flex:0 1 330px; background:white; border:1px solid #d3d7de; border-radius:12px; padding:12px 14px; font:inherit; color:var(--ink); }
+    .search:focus-visible, a:focus-visible { outline:3px solid #f2b544; outline-offset:3px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr)); gap:18px; }
+    .card { display:flex; flex-direction:column; padding:24px; min-height:250px; background:var(--paper); border:1px solid var(--line); border-radius:18px; box-shadow:0 6px 24px rgba(27,30,45,.045); transition:transform .18s,box-shadow .18s; }
+    .card:hover { transform:translateY(-3px); box-shadow:0 12px 28px rgba(27,30,45,.11); }
+    .symbol { display:grid; place-items:center; width:54px; height:54px; background:#fff0f2; color:var(--red); border-radius:15px; font-size:1.6rem; margin-bottom:16px; }
+    .card h3 { font-size:1.2rem; line-height:1.25; margin:0 0 9px; }
+    .card p { font-size:.94rem; color:var(--muted); margin:0 0 18px; }
+    .launch { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; background:var(--red); color:white; border-radius:10px; padding:11px 15px; font-weight:700; margin-top:auto; align-self:flex-start; }
+    .launch:hover { background:var(--red-dark); }
+    .empty { display:none; padding:30px; text-align:center; color:var(--muted); background:white; border-radius:15px; }
+    footer { border-top:1px solid var(--line); padding:24px 20px 35px; text-align:center; font-size:.85rem; color:var(--muted); }
+    @media (prefers-reduced-motion:reduce) { .card { transition:none; } }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Nipher • Classroom Resources</p>
+      <h1>Classroom Tools</h1>
+      <p class="subtitle">Your teaching tools, all in one place. Choose a resource below to launch it.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="bar">
+      <div><h2>My tools</h2><p class="count" id="count">5 resources available</p></div>
+      <input class="search" id="search" type="search" placeholder="Search tools..." aria-label="Search classroom tools">
+    </div>
+    <section class="grid" id="tools" aria-label="Classroom tools">
+      <article class="card" data-search="class bank bonus wheel rewards incentives game">
+        <span class="symbol" aria-hidden="true">🎡</span>
+        <h3>Class Bank Bonus Wheel</h3><p>Launch the class bonus wheel for a little extra fun and motivation.</p>
+        <a class="launch" href="Class%20Bank%20Bonus%20Wheel.html">Open tool ↗</a>
+      </article>
+      <article class="card" data-search="engineering tech expo teacher console project event">
+        <span class="symbol" aria-hidden="true">🛠️</span>
+        <h3>Engineering Tech Expo Teacher Console</h3><p>Access your Engineering Tech Expo teacher console.</p>
+        <a class="launch" href="Engineering%20Tech%20Explo%20Teacher%20Console.html">Open tool ↗</a>
+      </article>
+      <article class="card" data-search="mr williams seating chart maker desks arrangement students">
+        <span class="symbol" aria-hidden="true">🪑</span>
+        <h3>Mr. Williams’ Seating Chart Maker</h3><p>Open your classroom seating chart maker.</p>
+        <a class="launch" href="Mr.%20Williams%E2%80%99%20Seating%20Chart%20Maker.html">Open tool ↗</a>
+      </article>
+      <article class="card" data-search="rubrics assessment grading feedback criteria">
+        <span class="symbol" aria-hidden="true">📋</span>
+        <h3>Rubrics</h3><p>Keep your classroom rubrics within easy reach.</p>
+        <a class="launch" href="Rubrics.html">Open tool ↗</a>
+      </article>
+      <article class="card" data-search="screwdriver groups robotics tools rotation organization">
+        <span class="symbol" aria-hidden="true">🔧</span>
+        <h3>Screwdriver Groups</h3><p>Open your robotics screwdriver group organizer.</p>
+        <a class="launch" href="Screwdriver%20Groups.html">Open tool ↗</a>
+      </article>
+    </section>
+    <p class="empty" id="empty" role="status">No matching tools found. Try a different search.</p>
+  </main>
+  <footer>Classroom Tools • Nipher • Bookmark this page for quick access.</footer>
+  <script>
+    const search = document.getElementById('search');
+    const cards = [...document.querySelectorAll('.card')];
+    const count = document.getElementById('count');
+    const empty = document.getElementById('empty');
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLocaleLowerCase();
+      let shown = 0;
+      cards.forEach(card => {
+        const matches = (card.dataset.search + ' ' + card.querySelector('h3').textContent).toLocaleLowerCase().includes(query);
+        card.hidden = !matches;
+        if (matches) shown++;
+      });
+      count.textContent = shown + (shown === 1 ? ' resource' : ' resources') + ' available';
+      empty.style.display = shown ? 'none' : 'block';
+    });
+  </script>
+  <style>.card[hidden]{display:none}</style>
+</body>
+</html>
