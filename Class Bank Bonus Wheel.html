@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Class Bank Bonus Wheel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2f7;
+    --surface: #ffffff;
+    --ink: #14213d;
+    --muted: #55678a;
+    --line: #cfd8e5;
+    --red: #c8102e;
+    --amber: #f2b632;
+    --navy: #14213d;
+    --field: #f6f8fb;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1830;
+      --surface: #15244a;
+      --ink: #f3f6fb;
+      --muted: #a2b3d0;
+      --line: #2b3d68;
+      --field: #0f1d3b;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1830;
+    --surface: #15244a;
+    --ink: #f3f6fb;
+    --muted: #a2b3d0;
+    --line: #2b3d68;
+    --field: #0f1d3b;
+    color-scheme: dark;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 20px 48px; }
+  h1 {
+    font-family: "Alfa Slab One", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    font-size: clamp(28px, 4.4vw, 46px);
+    line-height: 1.1;
+    margin: 0 0 4px;
+    letter-spacing: 0.01em;
+  }
+  .sub { margin: 0 0 24px; color: var(--muted); font-size: 17px; max-width: 60ch; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  /* Wheel */
+  .stage { position: relative; width: min(600px, 100%); margin: 0 auto; aspect-ratio: 1; }
+  .rim {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: var(--navy);
+    padding: 3.2%;
+    box-shadow: 0 0 0 4px var(--amber), 0 18px 40px rgba(10, 20, 45, 0.28);
+  }
+  .rim canvas { width: 100%; height: 100%; display: block; border-radius: 50%; will-change: transform; }
+  .pointer {
+    position: absolute; top: -3.4%; left: 50%; width: 9%; transform: translateX(-50%);
+    z-index: 3; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35));
+  }
+  .hub {
+    position: absolute; top: 50%; left: 50%; width: 22%; aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%; border: 5px solid #fff;
+    background: var(--red); color: #fff;
+    font-family: "Alfa Slab One", Georgia, serif; font-size: clamp(14px, 3.4vw, 26px);
+    cursor: pointer; z-index: 4;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+  .hub:hover:not(:disabled) { transform: translate(-50%, -50%) scale(1.05); }
+  .hub:active:not(:disabled) { transform: translate(-50%, -50%) scale(0.97); }
+  .hub:disabled { background: #7b8499; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+
+  /* Panels */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .panel h2 { margin: 0 0 10px; font-size: 18px; font-weight: 700; }
+  .result { text-align: center; padding: 22px 20px; border-left: 8px solid var(--red); border-radius: 6px 14px 14px 6px; }
+  .result .amount {
+    font-family: "Alfa Slab One", Georgia, serif;
+    font-size: clamp(56px, 11vw, 96px);
+    line-height: 1;
+    color: var(--red);
+    min-height: 1em;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .result .amount { color: var(--amber); } }
+  :root[data-theme="dark"] .result .amount { color: var(--amber); }
+  .result .caption { margin: 8px 0 0; color: var(--muted); font-size: 17px; }
+  .pop { animation: pop 0.5s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes pop { from { transform: scale(0.6); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }
+
+  .stats { display: flex; gap: 12px; }
+  .stat { flex: 1; background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .stat b { display: block; font-family: "Alfa Slab One", Georgia, serif; font-weight: 400; font-size: 26px; }
+  .stat span { color: var(--muted); font-size: 14px; }
+
+  ul.history { list-style: none; margin: 10px 0 0; padding: 0; max-height: 170px; overflow-y: auto; }
+  ul.history li { display: flex; justify-content: space-between; padding: 6px 2px; border-bottom: 1px solid var(--line); font-size: 16px; }
+  ul.history li:last-child { border-bottom: 0; }
+  .empty { color: var(--muted); margin: 8px 0 0; }
+
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  textarea {
+    width: 100%; min-height: 84px; resize: vertical;
+    background: var(--field); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+    font: inherit; font-size: 16px;
+  }
+  .hint { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+  .error { color: var(--red); font-weight: 600; font-size: 15px; margin: 6px 0 0; min-height: 1.4em; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .error { color: #ff8a9b; } }
+  :root[data-theme="dark"] .error { color: #ff8a9b; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  button.btn {
+    font: inherit; font-weight: 700; font-size: 15px;
+    padding: 9px 16px; border-radius: 999px; cursor: pointer;
+    border: 2px solid var(--ink); background: transparent; color: var(--ink);
+  }
+  button.btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.btn.primary { background: var(--amber); color: var(--navy); border-color: var(--amber); } }
+  :root[data-theme="dark"] button.btn.primary { background: var(--amber); color: var(--navy); border-color: var(--amber); }
+  button.btn:hover { filter: brightness(1.08); }
+  .toggles { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .toggles label { display: flex; align-items: center; gap: 10px; font-weight: 400; margin: 0; cursor: pointer; }
+  .toggles input { width: 20px; height: 20px; accent-color: var(--red); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; border: 1px solid rgba(0,0,0,0.2); }
+
+  /* Full screen mode */
+  .fs-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+  .fs-result { display: none; text-align: center; }
+  .fs-result .amount {
+    font-family: "Alfa Slab One", Georgia, serif;
+    font-size: clamp(64px, 18vmin, 220px); line-height: 1; color: var(--red); min-height: 1em;
+  }
+  .fs-result p { margin: 10px 0 0; color: var(--muted); font-size: clamp(18px, 3.4vmin, 34px); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fs-result .amount { color: var(--amber); } }
+  :root[data-theme="dark"] .fs-result .amount { color: var(--amber); }
+  #wheelSection.fs {
+    position: fixed; inset: 0; z-index: 40; background: var(--bg);
+    display: flex; align-items: center; justify-content: center; gap: 4vw;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  #wheelSection.fs .fs-bar { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); right: 16px; margin: 0; z-index: 5; }
+  #wheelSection.fs .stage { width: min(86vh, 60vw); }
+  #wheelSection.fs .legend { display: none; }
+  #wheelSection.fs .fs-result { display: block; flex: 0 1 28vw; }
+  #wheelSection.fs .hub { font-size: clamp(20px, 5vmin, 60px); }
+  @media (max-aspect-ratio: 1/1) {
+    #wheelSection.fs { flex-direction: column; gap: 3vh; }
+    #wheelSection.fs .stage { width: min(90vw, 58vh); }
+    #wheelSection.fs .fs-result { flex: 0 0 auto; }
+  }
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .pop { animation: none; } .hub { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Class Bank Bonus Wheel</h1>
+  <p class="sub">Spin for a bonus between $1 and $200. Every slice is equally likely, so the big ones are rare.</p>
+
+  <div class="layout">
+    <section aria-label="Bonus wheel" id="wheelSection">
+      <div class="fs-bar"><button class="btn" id="fsBtn" type="button" aria-pressed="false">Full screen</button></div>
+      <div class="fs-body">
+      <div class="stage" id="stage">
+        <svg class="pointer" viewBox="0 0 60 70" aria-hidden="true">
+          <path d="M30 68 L4 8 Q30 -6 56 8 Z" fill="#c8102e" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/>
+        </svg>
+        <div class="rim"><canvas id="wheel" aria-label="Spinning wheel of bonus amounts" role="img"></canvas></div>
+        <button class="hub" id="spin" type="button">SPIN</button>
+      </div>
+      <div class="legend" id="legend" aria-label="Color key"></div>
+      </div>
+      <div class="fs-result" aria-hidden="true">
+        <div class="amount" id="fsAmount">$?</div>
+        <p id="fsCaption">Press SPIN to find your bonus.</p>
+      </div>
+    </section>
+
+    <section aria-label="Results and settings">
+      <div class="panel result">
+        <div class="amount" id="amount" aria-live="polite">$?</div>
+        <p class="caption" id="caption">Press SPIN to find your bonus.</p>
+      </div>
+
+      <div class="panel">
+        <div class="stats">
+          <div class="stat"><b id="total">$0</b><span>Added this session</span></div>
+          <div class="stat"><b id="count">0</b><span>Spins</span></div>
+        </div>
+        <ul class="history" id="history"></ul>
+        <p class="empty" id="historyEmpty">No spins yet.</p>
+        <div class="row"><button class="btn" id="clearHistory" type="button">Clear history</button></div>
+      </div>
+
+      <div class="panel">
+        <h2>Wheel values</h2>
+        <label for="values">Amounts (whole dollars, 1 to 200)</label>
+        <textarea id="values" spellcheck="false"></textarea>
+        <p class="hint">Separate amounts with commas. Use 2 to 40 slices. Repeat an amount to make it more likely.</p>
+        <p class="error" id="error" role="alert"></p>
+        <div class="row">
+          <button class="btn primary" id="apply" type="button">Update wheel</button>
+          <button class="btn" id="reset" type="button">Reset to default</button>
+        </div>
+        <div class="toggles">
+          <label><input type="checkbox" id="removeToggle"> Remove a slice after it lands</label>
+          <label><input type="checkbox" id="soundToggle" checked> Tick sound while spinning</label>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(function () {
+  var DEFAULT_VALUES = [5, 10, 1, 25, 15, 50, 5, 20, 10, 100, 2, 30, 15, 75, 5, 25, 10, 150, 20, 200];
+  var TIERS = [
+    { max: 10,  bg: "#9db4cc", fg: "#14213d", name: "$1 to $10" },
+    { max: 30,  bg: "#f2b632", fg: "#14213d", name: "$11 to $30" },
+    { max: 75,  bg: "#c8102e", fg: "#ffffff", name: "$31 to $75" },
+    { max: 200, bg: "#14213d", fg: "#f2b632", name: "$76 to $200" }
+  ];
+
+  var canvas = document.getElementById("wheel");
+  var ctx = canvas.getContext("2d");
+  var spinBtn = document.getElementById("spin");
+  var amountEl = document.getElementById("amount");
+  var captionEl = document.getElementById("caption");
+  var valuesEl = document.getElementById("values");
+  var errorEl = document.getElementById("error");
+  var historyEl = document.getElementById("history");
+  var historyEmpty = document.getElementById("historyEmpty");
+  var totalEl = document.getElementById("total");
+  var countEl = document.getElementById("count");
+  var removeToggle = document.getElementById("removeToggle");
+  var soundToggle = document.getElementById("soundToggle");
+
+  var values = DEFAULT_VALUES.slice();
+  var history = [];
+  var rotation = 0;
+  var spinning = false;
+  var audioCtx = null;
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function tierFor(v) {
+    for (var i = 0; i < TIERS.length; i++) if (v <= TIERS[i].max) return TIERS[i];
+    return TIERS[TIERS.length - 1];
+  }
+
+  /* ---------- storage (optional, per browser) ---------- */
+  function save() {
+    try {
+      localStorage.setItem("bonusWheel.values", JSON.stringify(values));
+      localStorage.setItem("bonusWheel.history", JSON.stringify(history));
+    } catch (e) {}
+  }
+  function load() {
+    try {
+      var v = JSON.parse(localStorage.getItem("bonusWheel.values") || "null");
+      if (Array.isArray(v) && v.length >= 1 && v.every(function (n) { return Number.isInteger(n) && n >= 1 && n <= 200; })) values = v;
+      var h = JSON.parse(localStorage.getItem("bonusWheel.history") || "null");
+      if (Array.isArray(h) && h.every(function (n) { return Number.isInteger(n); })) history = h;
+    } catch (e) {}
+  }
+
+  /* ---------- drawing ---------- */
+  function draw() {
+    var size = canvas.clientWidth;
+    if (!size) return;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, size * dpr / 2, size * dpr / 2);
+    ctx.clearRect(-size / 2, -size / 2, size, size);
+
+    var n = values.length;
+    var R = size / 2;
+    if (!n) {
+      ctx.fillStyle = "#9db4cc";
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+      return;
+    }
+    var seg = (Math.PI * 2) / n;
+    var fontPx = Math.max(12, Math.min(size * 0.075, (R * 0.9 * seg) * 0.62));
+    var fontFamily = '"Alfa Slab One", Georgia, serif';
+
+    for (var i = 0; i < n; i++) {
+      var start = -Math.PI / 2 + i * seg;
+      var t = tierFor(values[i]);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R, start, start + seg);
+      ctx.closePath();
+      ctx.fillStyle = t.bg;
+      ctx.fill();
+      ctx.lineWidth = Math.max(2, size * 0.004);
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+
+      ctx.save();
+      ctx.rotate(start + seg / 2);
+      ctx.fillStyle = t.fg;
+      ctx.font = fontPx + "px " + fontFamily;
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillText("$" + values[i], R - size * 0.04, 0);
+      ctx.restore();
+    }
+    canvas.style.transform = "rotate(" + rotation + "deg)";
+  }
+
+  function renderLegend() {
+    var el = document.getElementById("legend");
+    el.innerHTML = "";
+    TIERS.forEach(function (t) {
+      var s = document.createElement("span");
+      var i = document.createElement("i");
+      i.style.background = t.bg;
+      s.appendChild(i);
+      s.appendChild(document.createTextNode(t.name));
+      el.appendChild(s);
+    });
+  }
+
+  /* ---------- UI state ---------- */
+  function renderHistory() {
+    historyEl.innerHTML = "";
+    var total = 0;
+    history.forEach(function (v) { total += v; });
+    for (var i = history.length - 1; i >= Math.max(0, history.length - 30); i--) {
+      var li = document.createElement("li");
+      var a = document.createElement("span");
+      a.textContent = "Spin " + (i + 1);
+      var b = document.createElement("strong");
+      b.textContent = "$" + history[i];
+      li.appendChild(a); li.appendChild(b);
+      historyEl.appendChild(li);
+    }
+    historyEmpty.style.display = history.length ? "none" : "block";
+    totalEl.textContent = "$" + total;
+    countEl.textContent = history.length;
+  }
+
+  function syncTextarea() { valuesEl.value = values.join(", "); }
+
+  function updateSpinState() {
+    var ok = values.length >= 1 && !spinning;
+    spinBtn.disabled = !ok;
+    if (!values.length) {
+      amountEl.textContent = "$0";
+      captionEl.textContent = "The wheel is empty. Reset to default or add amounts.";
+    }
+  }
+
+  /* ---------- sound ---------- */
+  function tick() {
+    if (!soundToggle.checked || !audioCtx) return;
+    try {
+      var o = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      o.type = "square";
+      o.frequency.value = 900;
+      g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + 0.05);
+    } catch (e) {}
+  }
+  function chime(big) {
+    if (!soundToggle.checked || !audioCtx) return;
+    try {
+      var notes = big ? [523, 659, 784, 1047] : [660, 880];
+      notes.forEach(function (f, i) {
+        var o = audioCtx.createOscillator();
+        var g = audioCtx.createGain();
+        o.type = "triangle"; o.frequency.value = f;
+        var t0 = audioCtx.currentTime + i * 0.11;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.4);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t0); o.stop(t0 + 0.45);
+      });
+    } catch (e) {}
+  }
+
+  /* ---------- spin ---------- */
+  function indexAt(rot) {
+    var n = values.length;
+    var seg = 360 / n;
+    var a = (((-rot) % 360) + 360) % 360;
+    return Math.min(n - 1, Math.floor(a / seg));
+  }
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function spin() {
+    if (spinning || !values.length) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) {}
+
+    spinning = true;
+    updateSpinState();
+    amountEl.textContent = "$?";
+    captionEl.textContent = "Spinning...";
+
+    var startRot = rotation;
+    var turns = 6 + Math.floor(Math.random() * 3);
+    var finalRot = startRot + turns * 360 + Math.random() * 360;
+    var duration = reduceMotion ? 600 : 5200;
+    var t0 = performance.now();
+    var lastIdx = indexAt(startRot);
+
+    function frame(now) {
+      var p = Math.min(1, (now - t0) / duration);
+      rotation = startRot + (finalRot - startRot) * easeOut(p);
+      canvas.style.transform = "rotate(" + rotation + "deg)";
+      var idx = indexAt(rotation);
+      if (idx !== lastIdx) { tick(); lastIdx = idx; }
+      if (p < 1) requestAnimationFrame(frame);
+      else finish(indexAt(finalRot));
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function finish(idx) {
+    var won = values[idx];
+    spinning = false;
+    history.push(won);
+    amountEl.textContent = "$" + won;
+    amountEl.classList.remove("pop"); void amountEl.offsetWidth; amountEl.classList.add("pop");
+    captionEl.textContent = "added to the class bank";
+    var big = won >= 100;
+    chime(big);
+    if (big && !reduceMotion) confetti();
+
+    if (removeToggle.checked) {
+      values.splice(idx, 1);
+      syncTextarea();
+      draw();
+    }
+    renderHistory();
+    save();
+    updateSpinState();
+  }
+
+  /* ---------- confetti ---------- */
+  function confetti() {
+    var c = document.getElementById("confetti");
+    var cx = c.getContext("2d");
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    var colors = ["#c8102e", "#f2b632", "#ffffff", "#9db4cc", "#14213d"];
+    var bits = [];
+    for (var i = 0; i < 140; i++) {
+      bits.push({
+        x: c.width / 2 + (Math.random() - 0.5) * 200,
+        y: c.height * 0.45,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -Math.random() * 14 - 4,
+        w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+        r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+        col: colors[i % colors.length]
+      });
+    }
+    var start = performance.now();
+    (function step(now) {
+      var elapsed = now - start;
+      cx.clearRect(0, 0, c.width, c.height);
+      bits.forEach(function (b) {
+        b.vy += 0.35; b.x += b.vx; b.y += b.vy; b.r += b.vr; b.vx *= 0.99;
+        cx.save(); cx.translate(b.x, b.y); cx.rotate(b.r);
+        cx.fillStyle = b.col; cx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+        cx.restore();
+      });
+      if (elapsed < 3200) requestAnimationFrame(step);
+      else cx.clearRect(0, 0, c.width, c.height);
+    })(start);
+  }
+
+  /* ---------- settings ---------- */
+  function applyValues() {
+    var parts = valuesEl.value.split(/[\s,;]+/).filter(Boolean);
+    var nums = parts.map(function (p) { return Number(p.replace("$", "")); });
+    var bad = nums.some(function (n) { return !Number.isInteger(n) || n < 1 || n > 200; });
+    if (bad) { errorEl.textContent = "Use whole numbers from 1 to 200 only."; return; }
+    if (nums.length < 2) { errorEl.textContent = "Add at least 2 amounts."; return; }
+    if (nums.length > 40) { errorEl.textContent = "Use 40 amounts or fewer."; return; }
+    errorEl.textContent = "";
+    values = nums;
+    draw(); save(); updateSpinState();
+    if (!spinning) { amountEl.textContent = "$?"; captionEl.textContent = "Press SPIN to find your bonus."; }
+  }
+
+  document.getElementById("apply").addEventListener("click", applyValues);
+  document.getElementById("reset").addEventListener("click", function () {
+    values = DEFAULT_VALUES.slice();
+    errorEl.textContent = "";
+    syncTextarea(); draw(); save(); updateSpinState();
+    amountEl.textContent = "$?"; captionEl.textContent = "Press SPIN to find your bonus.";
+  });
+  document.getElementById("clearHistory").addEventListener("click", function () {
+    history = []; renderHistory(); save();
+  });
+  spinBtn.addEventListener("click", spin);
+
+  if (window.ResizeObserver) new ResizeObserver(draw).observe(canvas);
+  else window.addEventListener("resize", draw);
+
+  /* ---------- full screen ---------- */
+  var section = document.getElementById("wheelSection");
+  var fsBtn = document.getElementById("fsBtn");
+  var fsAmount = document.getElementById("fsAmount");
+  var fsCaption = document.getElementById("fsCaption");
+
+  function setFs(on) {
+    section.classList.toggle("fs", on);
+    document.body.style.overflow = on ? "hidden" : "";
+    fsBtn.textContent = on ? "Exit full screen" : "Full screen";
+    fsBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    requestAnimationFrame(draw);
+  }
+  function enterFs() {
+    setFs(true);
+    try {
+      var p = section.requestFullscreen && section.requestFullscreen();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+  }
+  function exitFs() {
+    setFs(false);
+    try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+  }
+  fsBtn.addEventListener("click", function () {
+    if (section.classList.contains("fs")) exitFs(); else enterFs();
+  });
+  document.addEventListener("fullscreenchange", function () {
+    if (!document.fullscreenElement && section.classList.contains("fs")) setFs(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!section.classList.contains("fs")) return;
+    if (e.key === "Escape") { exitFs(); }
+    else if (e.code === "Space" && e.target.tagName !== "BUTTON") { e.preventDefault(); spin(); }
+  });
+
+  function mirror() {
+    var changed = fsAmount.textContent !== amountEl.textContent;
+    fsAmount.textContent = amountEl.textContent;
+    fsCaption.textContent = captionEl.textContent;
+    if (changed && amountEl.textContent !== "$?") {
+      fsAmount.classList.remove("pop"); void fsAmount.offsetWidth; fsAmount.classList.add("pop");
+    }
+  }
+  var mo = new MutationObserver(mirror);
+  mo.observe(amountEl, { childList: true, characterData: true, subtree: true });
+  mo.observe(captionEl, { childList: true, characterData: true, subtree: true });
+
+  /* ---------- init ---------- */
+  load();
+  syncTextarea();
+  renderLegend();
+  renderHistory();
+  draw();
+  updateSpinState();
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('20px "Alfa Slab One"').then(draw, function () {});
+  }
+})();
+</script>
+</body>
+</html>

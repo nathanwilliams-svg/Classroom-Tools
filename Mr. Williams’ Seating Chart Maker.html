@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mr. Williams’ Seating Chart Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#C8102E; --brand-dark:#9B0D23; --brand-ink:#FFFFFF;
+  --accent:#C8102E; --accent-tint:#FBE9EC; --accent-line:#F1BEC6;
+  --bg:#F6F2F2; --panel:#FFFFFF; --ink:#2A1A1D; --muted:#7B6B6E; --line:#E7DCDE;
+  --floor:#FFFFFF; --floor-grid:#F3EBEC; --chip:#FFFFFF; --seat:#F4EEEF;
+  --boy:#35567D; --girl:#B7791F; --unset:#A99CA0; --gb-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(60,10,20,.08),0 8px 24px rgba(60,10,20,.07);
+  --display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --body:'Barlow','Helvetica Neue',Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --brand:#A50E27; --brand-dark:#7E0A1D; --accent:#FF6B80; --accent-tint:#3A1620; --accent-line:#6B2A38;
+    --bg:#150E10; --panel:#211618; --ink:#F6ECEE; --muted:#B39DA1; --line:#3A2A2D;
+    --floor:#1B1214; --floor-grid:#241A1C; --chip:#2D1F22; --seat:#291C1F;
+    --boy:#86AEDD; --girl:#E5AE50; --unset:#8C7B7F; --gb-ink:#1A1012;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --brand:#A50E27; --brand-dark:#7E0A1D; --accent:#FF6B80; --accent-tint:#3A1620; --accent-line:#6B2A38;
+  --bg:#150E10; --panel:#211618; --ink:#F6ECEE; --muted:#B39DA1; --line:#3A2A2D;
+  --floor:#1B1214; --floor-grid:#241A1C; --chip:#2D1F22; --seat:#291C1F;
+  --boy:#86AEDD; --girl:#E5AE50; --unset:#8C7B7F; --gb-ink:#1A1012;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.35;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.app{height:100%;display:flex;flex-direction:column;background:var(--bg);min-height:0}
+
+/* ---------- header ---------- */
+.top{background:var(--brand);color:var(--brand-ink);display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:4px solid var(--brand-dark);flex:none}
+.logo{width:40px;height:40px;border-radius:10px;background:#fff;display:grid;place-items:center;flex:none}
+.logo svg{width:26px;height:26px}
+.top h1{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(22px,3.2vw,34px);letter-spacing:.01em;line-height:1}
+.top .sub{font-size:13px;opacity:.88;margin-top:3px}
+.top .grow{flex:1}
+
+/* ---------- chart bar ---------- */
+.chartbar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex:none}
+.chartbar label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.chartbar select,.chartbar input[type=text]{height:36px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0 10px;min-width:0}
+.chartbar select{max-width:220px}
+.chartbar input[type=text]{width:220px;font-weight:600}
+.savestate{margin-left:auto;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.savestate .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.savestate.saving .dot{background:var(--unset)}
+
+/* ---------- buttons ---------- */
+.btn{height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:var(--accent-line);background:var(--accent-tint)}
+.btn svg{width:17px;height:17px;flex:none}
+.btn.primary{background:var(--brand);border-color:var(--brand-dark);color:#fff}
+.btn.primary:hover{background:var(--brand-dark)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.icon{width:36px;padding:0;justify-content:center}
+.btn[disabled]{opacity:.4;cursor:default;pointer-events:none}
+.btn.danger:hover{background:var(--accent-tint);color:var(--accent)}
+
+/* ---------- workspace ---------- */
+.workspace{flex:1;min-height:0;display:flex}
+.roster{width:300px;flex:none;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.app.hide-roster .roster{display:none}
+.roster-head{padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px}
+.roster-head .row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.roster-head h2{margin:0;font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:.01em}
+.roster-head .count{font-size:13px;color:var(--muted)}
+.roster-head .btns{display:flex;gap:8px}
+.roster-head .btns .btn{flex:1;justify-content:center}
+.search{height:36px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0 10px;width:100%}
+.pool{flex:1;min-height:0;overflow:auto;padding:4px 14px 18px;display:flex;flex-direction:column;gap:7px;transition:background .15s}
+.pool.over{background:var(--accent-tint);outline:2px dashed var(--accent);outline-offset:-6px}
+.empty{margin:auto;text-align:center;color:var(--muted);font-size:14px;padding:18px;max-width:230px}
+.empty b{display:block;color:var(--ink);font-family:var(--display);font-size:20px;margin-bottom:4px}
+
+/* ---------- stage ---------- */
+.stage-wrap{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+.group{display:flex;align-items:center;gap:6px}
+.group .cap{font-size:13px;color:var(--muted);margin-right:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--bg)}
+.seg button{border:0;background:transparent;height:34px;padding:0 12px;font-weight:600;font-size:14px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--brand);color:#fff}
+.seg button:not([aria-pressed=true]):hover{background:var(--accent-tint)}
+.zoomlbl{min-width:48px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.sep{width:1px;height:26px;background:var(--line)}
+.scroller{flex:1;min-height:0;overflow:auto;padding:16px;background:
+  radial-gradient(circle at 1px 1px,var(--line) 1px,transparent 0) 0 0/22px 22px,var(--bg);-webkit-overflow-scrolling:touch}
+.stage{position:relative;margin:0 auto}
+.room{position:absolute;left:0;top:0;display:flex;flex-direction:column;transform-origin:0 0;--floor:#1B0A0E;--floor-grid:#281118;--panel:#2A141A;--line:#5E3640;--ink:#FFFFFF;--muted:#E6CDD2;--seat:#38202A;--accent:#FF8FA0;--accent-tint:#4B1B26;--accent-line:#8A4452;background:var(--floor);border:2px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px 30px 30px;
+  background-image:linear-gradient(var(--floor-grid) 1px,transparent 1px),linear-gradient(90deg,var(--floor-grid) 1px,transparent 1px);background-size:34px 34px}
+.board{margin:0 auto 20px;width:62%;height:60px;border-radius:10px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;gap:16px;padding:0 20px;flex:none;overflow:hidden;font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.06em;border-bottom:5px solid var(--brand-dark)}
+.board .bt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:16px;border-left:2px solid rgba(255,255,255,.55);letter-spacing:.02em}
+.cols{display:flex;gap:26px;flex:1;justify-content:space-between}
+.col{display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+.col[data-c="0"]{--cc:#C8102E}
+.col[data-c="1"]{--cc:#1F6FB5}
+.col[data-c="2"]{--cc:#1F7A4D}
+.col[data-c="3"]{--cc:#7B3FA8}
+.col .collabel{background:var(--cc);color:#fff;border:0;border-radius:10px;padding:4px 0;margin-bottom:0;font-weight:700;letter-spacing:.03em}
+.collabel{font-family:var(--display);font-weight:600;font-size:24px;color:var(--muted);text-align:center;border-bottom:2px solid var(--line);padding-bottom:3px;margin-bottom:-4px}
+.table{position:relative;background:var(--panel);border:2px solid var(--cc,var(--line));border-radius:14px;padding:34px 8px 8px;box-shadow:0 2px 0 var(--line)}
+.table.bad{border-color:#FFD54A;background:#46350F}
+.tlabel{position:absolute;left:10px;top:4px;right:10px;display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:21px;color:#fff;line-height:1}
+.tflag{font-family:var(--body);font-weight:700;font-size:13px;background:#FFD54A;color:#2A1A00;border-radius:99px;padding:2px 9px}
+.tseats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:6px;width:426px;min-height:calc(var(--sr,1)*82px + (var(--sr,1) - 1)*6px)}
+.seat{width:auto;min-width:0;height:82px;border-radius:10px;background:var(--seat);border:2px dashed var(--line);display:grid;grid-template-columns:minmax(0,1fr);place-items:stretch;transition:background .12s,border-color .12s}
+.seat.filled{border:2px solid transparent;background:transparent}
+.tseats .seat:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 3px)}
+.seat.over{background:var(--accent-tint);border-color:var(--accent);border-style:solid}
+.seat .open{align-self:center;justify-self:center;font-size:15px;color:var(--muted)}
+.seat .chip{min-width:0;max-width:100%;padding-left:12px;gap:10px;background:var(--cc,var(--chip));border-color:rgba(255,255,255,.3);color:#fff}
+.seat .chip.g-b,.seat .chip.g-g,.seat .chip.g-u{border-left-color:rgba(255,255,255,.3)}
+.seat .chip .gb{background:#fff;color:var(--cc,#333)}
+.seat .pinmark{color:#fff}
+.seat .nm b{font-size:30px;font-weight:700;line-height:1.1;color:#fff}
+.ghost.seatghost{background:var(--cc);color:#fff;border-color:rgba(255,255,255,.4)}
+.ghost.seatghost .nm b{font-size:26px!important;color:#fff}
+.ghost.seatghost .gb{background:#fff;color:var(--cc)}
+.seat .gb{width:26px;height:26px;font-size:13px}
+.ghost .nm b{font-size:22px}
+.ghost .nm i{font-size:16px}
+
+/* ---------- chips ---------- */
+.chip{position:relative;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 10px;border-radius:9px;background:var(--chip);border:1px solid var(--line);border-left:5px solid var(--unset);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;min-height:46px;box-shadow:0 1px 2px rgba(60,10,20,.07)}
+.seat .chip{height:100%;min-height:0}
+.chip.g-b{border-left-color:var(--boy)}
+.chip.g-g{border-left-color:var(--girl)}
+.chip:hover{border-top-color:var(--accent-line);border-right-color:var(--accent-line);border-bottom-color:var(--accent-line)}
+.chip.dragging{opacity:.35}
+.chip.pinned{outline:2px solid var(--accent);outline-offset:-2px}
+.gb{width:22px;height:22px;border-radius:50%;border:0;flex:none;font-size:11px;font-weight:700;color:var(--gb-ink);background:var(--unset);padding:0;display:grid;place-items:center}
+.g-b .gb{background:var(--boy)}.g-g .gb{background:var(--girl)}
+.nm{display:flex;flex-direction:column;min-width:0;line-height:1.15;flex:1}
+.nm b{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm i{font-style:normal;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini{width:22px;height:22px;border-radius:6px;border:0;background:var(--panel);color:var(--muted);display:grid;place-items:center;padding:0;flex:none}
+.mini svg{width:14px;height:14px}
+.mini:hover{background:var(--accent-tint);color:var(--accent)}
+.seat .chip .acts{position:absolute;right:4px;top:4px;display:flex;gap:2px;opacity:0;transition:opacity .12s}
+.seat .chip:hover .acts,.seat .chip:focus-within .acts{opacity:1}
+.seat .chip.pinned .pinmark{display:grid}
+.pinmark{display:none;position:absolute;right:5px;bottom:4px;color:var(--accent)}
+.pinmark svg{width:13px;height:13px}
+.chip .acts.pool-acts{position:static;opacity:1}
+@media (hover:none){.seat .chip .acts{opacity:1}}
+
+.ghost{position:fixed;z-index:9999;pointer-events:none;width:210px;transform:translate(-50%,-50%) rotate(-2deg);box-shadow:0 14px 30px rgba(60,10,20,.35);opacity:.96}
+body.is-dragging,body.is-dragging *{cursor:grabbing!important}
+
+/* ---------- status line ---------- */
+.statusline{padding:8px 16px;background:var(--panel);border-top:1px solid var(--line);font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 18px}
+.statusline b{color:var(--ink);font-weight:600}
+.statusline .warn{color:var(--accent);font-weight:600}
+
+/* ---------- dialogs & toast ---------- */
+dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100vw - 28px));background:var(--panel);color:var(--ink);box-shadow:0 24px 70px rgba(30,5,10,.4)}
+dialog::backdrop{background:rgba(40,8,14,.5)}
+.dlg{padding:22px 22px 18px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 60px);overflow:auto}
+.dlg h2{margin:0;font-family:var(--display);font-size:28px;font-weight:700;color:var(--accent);line-height:1}
+.dlg p{margin:0;color:var(--muted);font-size:14px}
+.dlg .actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13.5px;font-weight:600}
+.field input[type=text],.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;font-weight:400;width:100%}
+.field textarea{min-height:120px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.dropzone{border:2px dashed var(--accent-line);border-radius:12px;padding:18px;text-align:center;background:var(--accent-tint);display:flex;flex-direction:column;align-items:center;gap:8px}
+.dropzone.over{border-color:var(--accent);background:var(--accent-tint)}
+.dropzone span{font-size:14px}
+.radios{display:flex;gap:16px;flex-wrap:wrap;font-weight:400}
+.radios label{display:flex;gap:6px;align-items:center;font-weight:500}
+.preview{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;max-height:130px;overflow:auto;background:var(--bg)}
+.preview .tally{font-weight:600;margin-bottom:4px}
+.preview ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 12px}
+.preview li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hint{font-size:12.5px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;display:flex;gap:12px;align-items:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:10000;max-width:min(560px,92vw);box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{background:transparent;border:0;color:var(--accent-line);font-weight:700;padding:0}
+:root[data-theme="dark"] .toast button{color:var(--accent)}
+
+/* ---------- full screen / expanded ---------- */
+.app.expanded,.app.is-fs{position:fixed;inset:0;z-index:50}
+.app.expanded .top,.app.is-fs .top,.app.expanded .chartbar,.app.is-fs .chartbar,.app.expanded .roster,.app.is-fs .roster,.app.expanded .toolbar,.app.is-fs .toolbar,.app.expanded .statusline,.app.is-fs .statusline{display:none}
+.app.expanded .scroller,.app.is-fs .scroller{padding:8px;background:#12060A}
+.fs-exit{display:none;position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:14px;z-index:60;box-shadow:var(--shadow)}
+.app.expanded .fs-exit,.app.is-fs .fs-exit{display:inline-flex}
+
+@media print{
+  html,body{height:auto;overflow:visible;background:#fff}
+  :root{padding:0}
+  .top,.chartbar,.roster,.toolbar,.statusline,.fs-exit,.toast,dialog{display:none!important}
+  .app,.workspace,.stage-wrap{display:block;height:auto;position:static}
+  .scroller{overflow:visible;padding:0;background:none}
+  .room,.room *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:landscape;margin:.4in}
+}
+.app.printing .room{--floor:#fff;--floor-grid:#fff;--panel:#fff;--line:#9a9a9a;--seat:#f1f1f1;--ink:#000;--muted:#333;box-shadow:none}
+.app.printing .tlabel{color:#000}
+.app.printing .table.bad{background:#fff}
+.app.printing .seat .open{visibility:hidden}
+@media (max-width:820px){
+  .workspace{flex-direction:column}
+  .roster{width:auto;height:34%;border-right:0;border-bottom:1px solid var(--line)}
+  .top .sub{display:none}
+  .chartbar input[type=text]{width:150px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="top">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none"><rect x="3" y="4" width="26" height="6" rx="2" fill="#C8102E"/><rect x="4" y="15" width="10" height="5" rx="1.5" fill="#C8102E"/><rect x="18" y="15" width="10" height="5" rx="1.5" fill="#C8102E"/><rect x="4" y="24" width="10" height="4" rx="1.5" fill="#C8102E" opacity=".55"/><rect x="18" y="24" width="10" height="4" rx="1.5" fill="#C8102E" opacity=".55"/></svg>
+    </div>
+    <div>
+      <h1>Mr. Williams’ Seating Chart Maker</h1>
+      <div class="sub">4 columns · 3 tables each · 2 seats per table · groups of 3 for bigger classes</div>
+    </div>
+    <div class="grow"></div>
+  </header>
+
+  <div class="chartbar">
+    <label>Saved chart
+      <select id="chartSelect" aria-label="Saved seating charts"></select>
+    </label>
+    <label>Name
+      <input type="text" id="chartName" maxlength="60" aria-label="Chart name">
+    </label>
+    <button class="btn" id="btnNew"></button>
+    <button class="btn" id="btnDup"></button>
+    <button class="btn danger" id="btnDel"></button>
+    <div class="savestate" id="saveState" role="status"><span class="dot"></span><span id="saveText">Saved</span></div>
+  </div>
+
+  <div class="workspace">
+    <aside class="roster" id="roster">
+      <div class="roster-head">
+        <div class="row"><h2>Students</h2><span class="count" id="rosterCount"></span></div>
+        <div class="btns">
+          <button class="btn primary" id="btnImport"></button>
+          <button class="btn" id="btnAdd"></button>
+        </div>
+        <input class="search" id="search" type="search" placeholder="Search students" aria-label="Search students">
+      </div>
+      <div class="pool" id="pool" data-pool="1"></div>
+    </aside>
+
+    <main class="stage-wrap">
+      <div class="toolbar" id="toolbar">
+        <div class="group" role="group" aria-label="Table pairing">
+          <span class="cap">Pair tables</span>
+          <div class="seg" id="pairSeg">
+            <button data-pair="same" title="Boys sit with boys, girls sit with girls">Same gender</button>
+            <button data-pair="mix" title="Each table has a boy and a girl">Boys &amp; girls</button>
+            <button data-pair="any" title="No pairing rule">No rule</button>
+          </div>
+        </div>
+        <div class="group">
+          <button class="btn primary" id="btnArrange" title="Fill the seats using the pairing rule. Pinned students stay put."></button>
+          <button class="btn" id="btnClear"></button>
+        </div>
+        <div class="sep"></div>
+        <div class="group">
+          <button class="btn icon" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"></button>
+          <button class="btn icon" id="btnRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"></button>
+        </div>
+        <div class="sep"></div>
+        <div class="group" role="group" aria-label="Zoom">
+          <button class="btn icon" id="zOut" title="Zoom out (−)" aria-label="Zoom out"></button>
+          <span class="zoomlbl" id="zLbl">100%</span>
+          <button class="btn icon" id="zIn" title="Zoom in (+)" aria-label="Zoom in"></button>
+          <button class="btn" id="zFit" title="Fit the room to the window"></button>
+        </div>
+        <div class="sep"></div>
+        <div class="group">
+          <button class="btn" id="btnFs"></button>
+          <button class="btn" id="btnCsv" title="Save the seating list as a spreadsheet"></button>
+          <button class="btn" id="btnPrint" title="Print the seating chart"></button>
+          <button class="btn" id="btnPdf" title="Save the seating chart as a PDF"></button>
+          <button class="btn icon" id="btnRosterToggle" title="Show or hide the student list" aria-label="Show or hide the student list"></button>
+        </div>
+      </div>
+
+      <div class="scroller" id="scroller">
+        <div class="stage" id="stage"><div class="room" id="room"></div></div>
+      </div>
+      <div class="statusline" id="stats"></div>
+    </main>
+  </div>
+
+  <!-- Import dialog -->
+  <dialog id="importDlg">
+    <div class="dlg">
+      <h2>Import a roster</h2>
+      <div class="dropzone" id="dropzone">
+        <span>Drop a .csv, .txt, or .pdf file here</span>
+        <button class="btn" id="btnPickFile"></button>
+        <input type="file" id="fileInput" accept=".csv,.txt,.tsv,.pdf,text/csv,text/plain,application/pdf" hidden>
+      </div>
+      <label class="field">Or paste names, one student per line
+        <textarea id="importText" placeholder="First Last, M&#10;First Last, F&#10;Last, First"></textarea>
+      </label>
+      <div class="hint">Works with simple lists (Name, First Last, or either with a gender column) and with school roster reports like “Last, First M Gender Grade”; headers and other extra lines are skipped. A gender can be M/F or Boy/Girl; blank means not set. Names are kept as first name and last initial only.</div>
+      <div class="field">
+        <span>When there are two name columns and no header</span>
+        <div class="radios">
+          <label><input type="radio" name="nameOrder" value="fl" checked> First, Last</label>
+          <label><input type="radio" name="nameOrder" value="lf"> Last, First</label>
+        </div>
+      </div>
+      <div class="field">
+        <span>Add to this chart</span>
+        <div class="radios">
+          <label><input type="radio" name="impMode" value="add" checked> Add to current students</label>
+          <label><input type="radio" name="impMode" value="replace"> Replace all students</label>
+        </div>
+      </div>
+      <div class="preview" id="importPreview"></div>
+      <div class="actions">
+        <button class="btn" id="impCancel">Cancel</button>
+        <button class="btn primary" id="impGo" disabled>Import</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Add student dialog -->
+  <dialog id="addDlg">
+    <div class="dlg">
+      <h2>Add students</h2>
+      <label class="field">Name
+        <input type="text" id="addName" placeholder="First Last" maxlength="60" autocomplete="off">
+      </label>
+      <div class="field">
+        <span>Gender</span>
+        <div class="radios">
+          <label><input type="radio" name="addG" value="b"> Boy</label>
+          <label><input type="radio" name="addG" value="g"> Girl</label>
+          <label><input type="radio" name="addG" value="?" checked> Not set</label>
+        </div>
+      </div>
+      <div class="hint" id="addMsg">Press Enter to add and keep going.</div>
+      <div class="actions">
+        <button class="btn" id="addDone">Done</button>
+        <button class="btn primary" id="addGo">Add student</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- New chart dialog -->
+  <dialog id="newDlg">
+    <div class="dlg">
+      <h2>New seating chart</h2>
+      <label class="field">Chart name
+        <input type="text" id="newName" placeholder="Period 3 · Fall" maxlength="60" autocomplete="off">
+      </label>
+      <div class="field">
+        <span>Starting point</span>
+        <div class="radios">
+          <label><input type="radio" name="newFrom" value="blank" checked> Blank chart</label>
+          <label><input type="radio" name="newFrom" value="copy"> Copy students from this chart</label>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="newCancel">Cancel</button>
+        <button class="btn primary" id="newGo">Create chart</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Confirm dialog -->
+  <dialog id="confirmDlg">
+    <div class="dlg">
+      <h2 id="cfTitle">Are you sure?</h2>
+      <p id="cfMsg"></p>
+      <div class="actions">
+        <button class="btn" id="cfNo">Cancel</button>
+        <button class="btn primary" id="cfYes">Confirm</button>
+      </div>
+    </div>
+  </dialog>
+
+  <button class="btn primary fs-exit" id="btnFsExit"></button>
+  <div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="toastAct" hidden></button></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ===================== constants & helpers ===================== */
+var COLS=4, LETTERS='ABCD';
+var LS_KEY='williams-seating-v1';
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var uid=function(p){return p+Math.random().toString(36).slice(2,9)};
+var shuffle=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a};
+var plural=function(n,w){return n+' '+w+(n===1?'':'s')};
+
+var I={
+  upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  minus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+  fit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg>',
+  full:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  exitfull:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>',
+  redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/></svg>',
+  shuffle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>',
+  clear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 001 1h8a1 1 0 001-1l1-12M9 7V4h6v3"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M6 7l1 12a1 1 0 001 1h8a1 1 0 001-1l1-12M9 7V4h6v3"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 3l7 7-2 1-3-1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4-1-3z"/></svg>',
+  out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4M16 8l4 4-4 4M20 12H9"/></svg>',
+  csv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M4 20h16"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>',
+  file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>'
+};
+
+/* ===================== data store ===================== */
+function newChart(name){
+  return {id:uid('c'),name:name||'Untitled chart',students:[],seats:{},pinned:{},pairing:'same',created:Date.now(),updated:Date.now()};
+}
+function defaultStore(){
+  var c=newChart('My first chart');
+  var s={v:1,current:c.id,order:[c.id],charts:{},savedAt:0};
+  s.charts[c.id]=c; return s;
+}
+function validStore(s){
+  return s&&s.charts&&s.order&&s.order.length&&s.current&&s.charts[s.current];
+}
+var store;
+try{ var raw=localStorage.getItem(LS_KEY); store=raw?JSON.parse(raw):null; }catch(e){ store=null; }
+if(!validStore(store)) store=defaultStore();
+/* Keep only first name + last initial for every student, in every roster */
+function migrateNames(st){
+  Object.keys(st.charts||{}).forEach(function(id){
+    (st.charts[id].students||[]).forEach(function(s){
+      if(!s.last&&/\s/.test((s.first||'').trim())){ var n=splitName(s.first); s.first=n.first; s.last=n.last; }
+      s.last=(s.last||'').trim().charAt(0).toUpperCase();
+    });
+  });
+}
+function initialsOnly(a){ a.forEach(function(s){ s.last=(s.last||'').trim().charAt(0).toUpperCase(); }); return a; }
+migrateNames(store);
+
+function cur(){return store.charts[store.current]}
+function stuById(id){var st=cur().students;for(var i=0;i<st.length;i++)if(st[i].id===id)return st[i];return null}
+function seatOf(sid){var s=cur().seats;for(var k in s)if(s[k]===sid)return k;return null}
+
+/* ---- tables ---- */
+function tableList(sizes){
+  var t=[];
+  for(var c=0;c<COLS;c++)for(var r=0;r<TPC;r++){
+    var n=sizes[c*TPC+r], seats=[];
+    for(var i=0;i<n;i++)seats.push(c+'-'+r+'-'+i);
+    t.push({id:LETTERS[c]+(r+1),col:c,row:r,seats:seats});
+  }
+  return t;
+}
+var TPC=3, TABLES=[], TOTAL_SEATS=24, MAXSEATS=2, lastTpc=2;
+/* Three rows of tables per column, always. Tables seat 2, and grow to groups of 3 (or more) once the class is bigger than 24. */
+function refreshTables(){
+  var c=cur(), T=COLS*TPC, n=c.students.length;
+  var base=Math.max(2,Math.floor(n/T)), extra=Math.max(0,n-base*T);
+  var order=[]; for(var r=0;r<TPC;r++)for(var col=0;col<COLS;col++)order.push(col*TPC+r);
+  var sizes=[]; for(var i=0;i<T;i++)sizes.push(base);
+  for(var e=0;e<extra&&e<order.length;e++)sizes[order[e]]++;
+  Object.keys(c.seats).forEach(function(k){
+    var p=k.split('-'), idx=(+p[0])*TPC+(+p[1]), si=(+p[2])+1;
+    if(idx<T&&si>sizes[idx])sizes[idx]=si;
+  });
+  TABLES=tableList(sizes);
+  TOTAL_SEATS=sizes.reduce(function(a,b){return a+b},0);
+  MAXSEATS=Math.max.apply(null,sizes);
+}
+refreshTables();
+
+/* ---- persistence ---- */
+var saveTimer=null, dbDoc=null;
+function setSaveText(state){
+  var el=$('#saveState'), tx=$('#saveText');
+  el.classList.toggle('saving',state==='saving');
+  if(state==='saving') tx.textContent='Saving…';
+  else tx.textContent= dbDoc ? 'All changes saved to your account' : 'All changes saved on this device';
+}
+function persistLocal(){ try{localStorage.setItem(LS_KEY,JSON.stringify(store))}catch(e){} }
+function scheduleSave(){
+  setSaveText('saving');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    store.savedAt=Date.now();
+    persistLocal();
+    if(dbDoc){
+      dbDoc.set({payload:JSON.stringify(store)}).then(function(){setSaveText('saved')},function(){dbDoc=null;setSaveText('saved')});
+    } else setSaveText('saved');
+  },450);
+}
+function waitForClaude(ms){
+  return new Promise(function(res){
+    var t0=Date.now();
+    (function poll(){
+      if(window.claude&&typeof window.claude.use==='function') return res(window.claude);
+      if(Date.now()-t0>ms) return res(null);
+      setTimeout(poll,150);
+    })();
+  });
+}
+function initCloud(){
+  waitForClaude(5000).then(function(cl){
+    if(!cl) return null;
+    return Promise.all([cl.use('db'),cl.use('user')]).then(function(r){
+      var db=r[0],user=r[1];
+      if(!db||!user) return;
+      return user.id().then(function(id){
+        if(!id) return;
+        var doc=db.collection('data/users/'+id).doc('seating');
+        return doc.get().then(function(snap){
+          dbDoc=doc;
+          if(snap.exists){
+            var remote=null;
+            try{remote=JSON.parse(snap.data().payload)}catch(e){}
+            if(validStore(remote)&&(remote.savedAt||0)>(store.savedAt||0)){
+              store=remote; migrateNames(store); persistLocal(); resetHistory(); renderAll(); fitView();
+            } else if((store.savedAt||0)>0){ scheduleSave(); }
+          } else if((store.savedAt||0)>0){ scheduleSave(); }
+          setSaveText('saved');
+        });
+      });
+    });
+  }).catch(function(){});
+}
+
+/* ---- undo / redo ---- */
+var undoStack=[], redoStack=[];
+function snap(){var c=cur();return JSON.stringify({students:c.students,seats:c.seats,pinned:c.pinned,pairing:c.pairing})}
+function snapshot(){undoStack.push(snap());if(undoStack.length>60)undoStack.shift();redoStack=[];}
+function applySnap(j){var o=JSON.parse(j),c=cur();c.students=o.students;c.seats=o.seats;c.pinned=o.pinned;c.pairing=o.pairing;}
+function resetHistory(){undoStack=[];redoStack=[]}
+function undo(){ if(!undoStack.length)return; redoStack.push(snap()); applySnap(undoStack.pop()); commit(); }
+function redo(){ if(!redoStack.length)return; undoStack.push(snap()); applySnap(redoStack.pop()); commit(); }
+function commit(){ cur().updated=Date.now(); scheduleSave(); renderAll(); }
+
+/* ===================== rendering ===================== */
+function glabel(g){return g==='b'?'B':g==='g'?'G':'–'}
+function gname(g){return g==='b'?'boy':g==='g'?'girl':'not set'}
+/* First name and last initial (uses the full last name only if two students would look the same) */
+function nameParts(s){
+  var first=s.first||'', last=s.last||'';
+  if(!last&&/\s/.test(first.trim())){ var n=splitName(first); first=n.first; last=n.last; }
+  return {first:first,last:last};
+}
+function shortName(s){
+  var p=nameParts(s);
+  if(!p.last)return p.first;
+  var ini=p.last.charAt(0).toUpperCase(), f=p.first.toLowerCase();
+  var dup=cur().students.some(function(o){ if(o===s)return false; var q=nameParts(o); return q.first.toLowerCase()===f&&q.last.charAt(0).toUpperCase()===ini; });
+  return p.first+' '+(dup?p.last:ini+'.');
+}
+/* Shrink a name only as much as needed so it fits on its seat */
+function fitNames(){
+  document.querySelectorAll('#room .seat .nm b').forEach(function(b){
+    var size=30; b.style.fontSize=size+'px';
+    while(b.scrollWidth>b.clientWidth+0.5&&size>14){ size-=1; b.style.fontSize=size+'px'; }
+  });
+}
+function chipHTML(s,where){
+  var c=cur(), pinned=!!c.pinned[s.id];
+  var cls='chip g-'+(s.g==='b'?'b':s.g==='g'?'g':'u')+(pinned?' pinned':'');
+  var full=shortName(s);
+  var acts= where==='seat'
+    ? '<span class="acts"><button class="mini" data-act="pin" title="'+(pinned?'Unpin (auto-arrange may move this student)':'Pin to this seat (auto-arrange leaves this student here)')+'" aria-label="Pin seat">'+I.pin+'</button><button class="mini" data-act="unseat" title="Take out of seat" aria-label="Take out of seat">'+I.out+'</button></span><span class="pinmark" title="Pinned">'+I.pin+'</span>'
+    : '<span class="acts pool-acts"><button class="mini" data-act="delete" title="Remove from roster" aria-label="Remove from roster">'+I.trash+'</button></span>';
+  return '<div class="'+cls+'" data-sid="'+s.id+'" data-where="'+where+'" title="'+esc(full)+' · '+gname(s.g)+'">'
+    +'<button class="gb" data-act="gender" title="'+gname(s.g)+' (click to change)" aria-label="Gender: '+gname(s.g)+'. Click to change">'+glabel(s.g)+'</button>'
+    +'<span class="nm"><b>'+esc(shortName(s))+'</b></span>'+acts+'</div>';
+}
+function compat(a,b,mode){
+  if(a==='?'||b==='?') return true;
+  if(mode==='same') return a===b;
+  if(mode==='mix') return a!==b;
+  return true;
+}
+function renderChartBar(){
+  var sel=$('#chartSelect');
+  sel.innerHTML=store.order.map(function(id){var c=store.charts[id];return '<option value="'+id+'"'+(id===store.current?' selected':'')+'>'+esc(c.name)+'</option>'}).join('');
+  var nm=$('#chartName'); if(document.activeElement!==nm) nm.value=cur().name;
+  $('#btnDel').disabled=false;
+}
+function renderRoster(){
+  var c=cur(), q=($('#search').value||'').trim().toLowerCase();
+  var seated={}; for(var k in c.seats) seated[c.seats[k]]=true;
+  var unseated=c.students.filter(function(s){return !seated[s.id]});
+  var list=unseated.filter(function(s){return !q||(s.first+' '+s.last).toLowerCase().indexOf(q)>-1})
+    .sort(function(a,b){return (a.last||'').localeCompare(b.last||'')||a.first.localeCompare(b.first)});
+  $('#rosterCount').textContent=c.students.length?(unseated.length+' unseated · '+(c.students.length-unseated.length)+' seated'):'';
+  var pool=$('#pool');
+  if(!c.students.length){
+    pool.innerHTML='<div class="empty"><b>No students yet</b>Import a roster file or add students one at a time to get started.</div>';
+  } else if(!unseated.length){
+    pool.innerHTML='<div class="empty"><b>Everyone has a seat</b>Drag a student here to take them out of their seat.</div>';
+  } else if(!list.length){
+    pool.innerHTML='<div class="empty">No unseated students match “'+esc(q)+'”.</div>';
+  } else pool.innerHTML=list.map(function(s){return chipHTML(s,'pool')}).join('');
+}
+function tableState(t){
+  var c=cur();
+  var stus=t.seats.map(function(sid){return stuById(c.seats[sid])}).filter(Boolean);
+  var known=stus.filter(function(s){return s.g!=='?'}).map(function(s){return s.g});
+  var bad=false;
+  if(c.pairing==='same') bad=known.length>1&&known.some(function(g){return g!==known[0]});
+  else if(c.pairing==='mix') bad=known.length>1&&known.every(function(g){return g===known[0]});
+  return {stus:stus,bad:bad};
+}
+function renderRoom(){
+  var c=cur(), h='<div class="board"><span>FRONT OF ROOM</span><span class="bt">'+esc(c.name)+'</span></div><div class="cols">';
+  for(var col=0;col<COLS;col++){
+    h+='<div class="col" data-c="'+col+'"><div class="collabel">Column '+LETTERS[col]+'</div>';
+    for(var r=0;r<TPC;r++){
+      var t=TABLES[col*TPC+r], st=tableState(t);
+      h+='<div class="table'+(st.bad?' bad':'')+'"><div class="tlabel"><span>'+t.id+'</span>'+(st.bad?'<span class="tflag" title="This table does not follow the pairing rule">Check pairing</span>':'')+'</div><div class="tseats">';
+      for(var s=0;s<t.seats.length;s++){
+        var sid=t.seats[s], stu=stuById(c.seats[sid]);
+        h+='<div class="seat'+(stu?' filled':'')+'" data-seat="'+sid+'">'+(stu?chipHTML(stu,'seat'):'<span class="open">Open seat</span>')+'</div>';
+      }
+      h+='</div></div>';
+    }
+    h+='</div>';
+  }
+  h+='</div>';
+  $('#room').innerHTML=h;
+  $('#room').style.setProperty('--sr',Math.ceil(MAXSEATS/2));
+  fitNames();
+}
+function renderStats(){
+  var c=cur(), seated=Object.keys(c.seats).length, bb=0,gg=0,mx=0,solo=0,bad=0;
+  TABLES.forEach(function(t){
+    var st=tableState(t), gs=st.stus.map(function(x){return x.g});
+    if(gs.length>=2){
+      if(gs.every(function(g){return g==='b'}))bb++;
+      else if(gs.every(function(g){return g==='g'}))gg++;
+      else if(gs.indexOf('?')<0)mx++;
+      if(st.bad)bad++;
+    } else if(gs.length===1) solo++;
+  });
+  var parts=['<span><b>'+seated+'</b> of '+TOTAL_SEATS+' seats filled</span>'];
+  if(MAXSEATS>2) parts.push('<span>Larger class: some tables seat <b>'+MAXSEATS+'</b></span>');
+  parts.push('<span>Tables: <b>'+bb+'</b> boy–boy · <b>'+gg+'</b> girl–girl · <b>'+mx+'</b> mixed · <b>'+solo+'</b> with one student</span>');
+  if(bad) parts.push('<span class="warn">'+plural(bad,'table')+' not following the rule</span>');
+  $('#stats').innerHTML=parts.join('');
+}
+function renderToolbar(){
+  var c=cur();
+  document.querySelectorAll('#pairSeg button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.pair===c.pairing?'true':'false')});
+  $('#btnUndo').disabled=!undoStack.length;
+  $('#btnRedo').disabled=!redoStack.length;
+}
+function renderAll(){ refreshTables(); renderChartBar(); renderRoster(); renderRoom(); renderStats(); renderToolbar(); applyZoom(); if(MAXSEATS!==lastTpc){ lastTpc=MAXSEATS; fitView(); } }
+
+/* static icon labels */
+$('#btnNew').innerHTML=I.plus+'New chart';
+$('#btnDup').innerHTML=I.copy+'Duplicate';
+$('#btnDel').innerHTML=I.trash+'Delete';
+$('#btnImport').innerHTML=I.upload+'Import roster';
+$('#btnAdd').innerHTML=I.plus+'Add';
+$('#btnArrange').innerHTML=I.shuffle+'Auto-arrange';
+$('#btnClear').innerHTML=I.clear+'Clear seats';
+$('#btnUndo').innerHTML=I.undo;
+$('#btnRedo').innerHTML=I.redo;
+$('#zOut').innerHTML=I.minus;
+$('#zIn').innerHTML=I.plus;
+$('#zFit').innerHTML=I.fit+'Fit';
+$('#btnCsv').innerHTML=I.csv+'Export CSV';
+$('#btnPrint').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6M7 17H5a1 1 0 01-1-1v-6a1 1 0 011-1h14a1 1 0 011 1v6a1 1 0 01-1 1h-2"/><rect x="7" y="14" width="10" height="7" rx="1"/></svg>Print';
+$('#btnPdf').innerHTML=I.file+'Save PDF';
+$('#btnRosterToggle').innerHTML=I.list;
+$('#btnPickFile').innerHTML=I.file+'Choose a file';
+$('#btnFsExit').innerHTML=I.exitfull+'Exit full screen';
+
+/* ===================== zoom ===================== */
+var zoom=1, ZMIN=0.3, ZMAX=3;
+var scroller=$('#scroller'), stage=$('#stage'), room=$('#room');
+function applyZoom(){
+  room.style.transform='scale('+zoom+')';
+  stage.style.width=(room.offsetWidth*zoom)+'px';
+  stage.style.height=(room.offsetHeight*zoom)+'px';
+  $('#zLbl').textContent=Math.round(zoom*100)+'%';
+}
+function setZoom(z,px,py){
+  z=Math.max(ZMIN,Math.min(ZMAX,z));
+  if(Math.abs(z-zoom)<0.001)return;
+  var r=scroller.getBoundingClientRect();
+  if(px==null){px=r.left+r.width/2;py=r.top+r.height/2;}
+  var sr=stage.getBoundingClientRect();
+  var cx=(px-sr.left)/zoom, cy=(py-sr.top)/zoom;
+  zoom=z; applyZoom();
+  var sr2=stage.getBoundingClientRect();
+  scroller.scrollLeft+=(sr2.left+cx*zoom)-px;
+  scroller.scrollTop+=(sr2.top+cy*zoom)-py;
+}
+function fitView(){
+  var fsMode=app.classList.contains('is-fs')||app.classList.contains('expanded');
+  room.style.minWidth=''; room.style.minHeight='';
+  var pad=fsMode?16:34;
+  var w=scroller.clientWidth-pad, h=scroller.clientHeight-pad;
+  if(w<=0||h<=0)return;
+  zoom=Math.max(ZMIN,Math.min(ZMAX,Math.min(w/room.offsetWidth,h/room.offsetHeight)));
+  if(fsMode){ room.style.minWidth=Math.floor(w/zoom)+'px'; room.style.minHeight=Math.floor(h/zoom)+'px'; }
+  applyZoom(); scroller.scrollLeft=0; scroller.scrollTop=0;
+}
+$('#zIn').onclick=function(){setZoom(zoom*1.15)};
+$('#zOut').onclick=function(){setZoom(zoom/1.15)};
+$('#zFit').onclick=fitView;
+scroller.addEventListener('wheel',function(e){
+  if(!(e.ctrlKey||e.metaKey))return;
+  e.preventDefault();
+  setZoom(zoom*Math.exp(-e.deltaY*0.0022),e.clientX,e.clientY);
+},{passive:false});
+
+/* ===================== full screen ===================== */
+var app=$('#app');
+function isFs(){return document.fullscreenElement||document.webkitFullscreenElement}
+function updateFsBtn(){
+  var on=isFs()||app.classList.contains('expanded');
+  $('#btnFs').innerHTML=(on?I.exitfull:I.full)+(on?'Exit full screen':'Full screen');
+}
+function setExpanded(on){
+  app.classList.toggle('expanded',on); updateFsBtn(); setTimeout(fitView,60);
+  if(on) toast('Full screen is limited in this view, so everything except the seating chart is hidden instead. Use the Exit full screen button or press Esc.');
+}
+function toggleFs(){
+  if(isFs()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); return; }
+  if(app.classList.contains('expanded')){ app.classList.remove('expanded'); updateFsBtn(); setTimeout(fitView,60); return; }
+  var req=app.requestFullscreen||app.webkitRequestFullscreen;
+  if(!req){ setExpanded(true); return; }
+  try{
+    var p=req.call(app);
+    if(p&&p.catch) p.catch(function(){setExpanded(true)});
+  }catch(e){ setExpanded(true); }
+}
+function onFsChange(){ app.classList.toggle('is-fs',!!isFs()); updateFsBtn(); setTimeout(fitView,80); }
+document.addEventListener('fullscreenchange',onFsChange);
+document.addEventListener('webkitfullscreenchange',onFsChange);
+$('#btnFs').onclick=toggleFs;
+$('#btnFsExit').onclick=toggleFs;
+updateFsBtn();
+
+/* ===================== toast ===================== */
+var toastTimer=null;
+function toast(msg,actLabel,actFn){
+  $('#toastMsg').textContent=msg;
+  var b=$('#toastAct');
+  if(actLabel){ b.hidden=false; b.textContent=actLabel; b.onclick=function(){hideToast();actFn&&actFn()}; } else { b.hidden=true; b.onclick=null; }
+  $('#toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(hideToast,actLabel?6500:4200);
+}
+function hideToast(){ $('#toast').classList.remove('show'); }
+
+/* ===================== confirm dialog ===================== */
+function confirmBox(title,msg,okLabel){
+  return new Promise(function(res){
+    var d=$('#confirmDlg');
+    $('#cfTitle').textContent=title; $('#cfMsg').textContent=msg; $('#cfYes').textContent=okLabel||'Confirm';
+    var done=function(v){d.close();res(v)};
+    $('#cfYes').onclick=function(){done(true)};
+    $('#cfNo').onclick=function(){done(false)};
+    d.oncancel=function(){res(false)};
+    d.showModal();
+  });
+}
+
+/* ===================== drag and drop ===================== */
+var drag=null, edgeTimer=null;
+document.addEventListener('pointerdown',function(e){
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  var chip=e.target.closest&&e.target.closest('.chip');
+  if(!chip||e.target.closest('[data-act]'))return;
+  drag={id:chip.dataset.sid,chip:chip,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,active:false,ghost:null};
+});
+document.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  drag.x=e.clientX; drag.y=e.clientY;
+  if(!drag.active){
+    if(Math.hypot(drag.x-drag.x0,drag.y-drag.y0)<5)return;
+    drag.active=true;
+    var g=drag.chip.cloneNode(true);
+    g.classList.add('ghost'); g.classList.remove('dragging');
+    if(drag.chip.closest('.seat')){ g.classList.add('seatghost'); g.style.setProperty('--cc',getComputedStyle(drag.chip).getPropertyValue('--cc')); }
+    g.querySelectorAll('.acts,.pinmark').forEach(function(n){n.remove()});
+    document.body.appendChild(g); drag.ghost=g;
+    drag.chip.classList.add('dragging');
+    document.body.classList.add('is-dragging');
+    edgeTimer=setInterval(edgeScroll,16);
+  }
+  e.preventDefault();
+  drag.ghost.style.left=drag.x+'px'; drag.ghost.style.top=drag.y+'px';
+  highlight();
+});
+function targetAt(x,y){
+  var el=document.elementFromPoint(x,y);
+  if(!el)return null;
+  var seat=el.closest('.seat'); if(seat)return {type:'seat',id:seat.dataset.seat,el:seat};
+  var pool=el.closest('[data-pool]'); if(pool)return {type:'pool',el:pool};
+  var ros=el.closest('#roster'); if(ros)return {type:'pool',el:$('#pool')};
+  return null;
+}
+function highlight(){
+  document.querySelectorAll('.seat.over,.pool.over').forEach(function(n){n.classList.remove('over')});
+  var t=targetAt(drag.x,drag.y);
+  if(t)t.el.classList.add('over');
+}
+function edgeScroll(){
+  if(!drag||!drag.active)return;
+  var r=scroller.getBoundingClientRect(), m=48, sp=14;
+  if(drag.x<r.left||drag.x>r.right||drag.y<r.top||drag.y>r.bottom)return;
+  if(drag.x<r.left+m)scroller.scrollLeft-=sp;
+  else if(drag.x>r.right-m)scroller.scrollLeft+=sp;
+  if(drag.y<r.top+m)scroller.scrollTop-=sp;
+  else if(drag.y>r.bottom-m)scroller.scrollTop+=sp;
+}
+function endDrag(e,cancel){
+  if(!drag)return;
+  var d=drag; drag=null;
+  clearInterval(edgeTimer);
+  if(!d.active)return;
+  d.ghost.remove();
+  document.body.classList.remove('is-dragging');
+  document.querySelectorAll('.seat.over,.pool.over').forEach(function(n){n.classList.remove('over')});
+  d.chip.classList.remove('dragging');
+  if(cancel)return;
+  var t=targetAt(e.clientX,e.clientY);
+  if(t)moveStudent(d.id,t);
+}
+document.addEventListener('pointerup',function(e){endDrag(e,false)});
+document.addEventListener('pointercancel',function(e){endDrag(e,true)});
+document.addEventListener('dragstart',function(e){if(e.target.closest&&e.target.closest('.chip'))e.preventDefault()});
+
+function moveStudent(sid,t){
+  var c=cur(), from=seatOf(sid);
+  if(t.type==='pool'){
+    if(!from)return;
+    snapshot(); delete c.seats[from]; delete c.pinned[sid];
+  } else {
+    var occ=c.seats[t.id];
+    if(occ===sid)return;
+    snapshot();
+    if(from){ delete c.seats[from]; if(occ)c.seats[from]=occ; }
+    c.seats[t.id]=sid;
+  }
+  commit();
+}
+
+/* ===================== chip & toolbar actions ===================== */
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('[data-act]');
+  if(!b)return;
+  var chip=b.closest('.chip'); if(!chip)return;
+  var sid=chip.dataset.sid, s=stuById(sid), c=cur();
+  if(!s)return;
+  var act=b.dataset.act;
+  if(act==='gender'){
+    snapshot(); s.g= s.g==='b'?'g':s.g==='g'?'?':'b'; commit();
+  } else if(act==='pin'){
+    snapshot(); if(c.pinned[sid])delete c.pinned[sid]; else c.pinned[sid]=true; commit();
+  } else if(act==='unseat'){
+    var k=seatOf(sid); if(k){snapshot(); delete c.seats[k]; delete c.pinned[sid]; commit();}
+  } else if(act==='delete'){
+    snapshot();
+    c.students=c.students.filter(function(x){return x.id!==sid});
+    var k2=seatOf(sid); if(k2)delete c.seats[k2]; delete c.pinned[sid];
+    commit(); toast('Removed '+s.first+(s.last?' '+s.last:'')+' from the roster.','Undo',undo);
+  }
+});
+
+document.querySelectorAll('#pairSeg button').forEach(function(b){
+  b.onclick=function(){
+    var c=cur(); if(c.pairing===b.dataset.pair)return;
+    snapshot(); c.pairing=b.dataset.pair; commit();
+    var n=0; TABLES.forEach(function(t){if(tableState(t).bad)n++});
+    if(n) toast('Pairing rule changed. '+plural(n,'table')+' no longer follow it. Press Auto-arrange to fix them.');
+  };
+});
+$('#btnUndo').onclick=undo;
+$('#btnRedo').onclick=redo;
+$('#btnClear').onclick=function(){
+  var c=cur(), n=Object.keys(c.seats).length;
+  if(!n){toast('No one is seated yet.');return;}
+  confirmBox('Clear all seats?','This takes everyone out of their seats, including pinned students. The roster stays. You can undo this.','Clear seats').then(function(ok){
+    if(!ok)return; snapshot(); c.seats={}; c.pinned={}; commit();
+    toast('Seats cleared.','Undo',undo);
+  });
+};
+$('#btnRosterToggle').onclick=function(){ app.classList.toggle('hide-roster'); setTimeout(fitView,50); };
+$('#search').addEventListener('input',renderRoster);
+
+/* ===================== auto-arrange ===================== */
+function autoArrange(){
+  var c=cur();
+  if(!c.students.length){toast('Add or import students first.');return;}
+  refreshTables();
+  snapshot();
+  var mode=c.pairing;
+  Object.keys(c.seats).forEach(function(k){ if(!c.pinned[c.seats[k]]) delete c.seats[k]; });
+  var placed={}; for(var k in c.seats) placed[c.seats[k]]=true;
+  var pool=shuffle(c.students.filter(function(s){return !placed[s.id]}));
+  var gOf=function(id){return stuById(id).g};
+  function existingG(t){
+    return t.seats.map(function(sid){return c.seats[sid]}).filter(Boolean).map(gOf).filter(function(g){return g!=='?'});
+  }
+  function okFor(t,g){
+    if(mode==='any'||g==='?')return true;
+    var ex=existingG(t); if(!ex.length)return true;
+    var allSame=ex.every(function(x){return x===ex[0]});
+    if(mode==='same')return allSame&&ex[0]===g;
+    return !(allSame&&ex[0]===g);
+  }
+  function emptySeats(t){return t.seats.filter(function(sid){return !c.seats[sid]})}
+  function take(pred){
+    for(var i=0;i<pool.length;i++){ if(pred(pool[i])) return pool.splice(i,1)[0]; }
+    return null;
+  }
+  function fill(tables,list){
+    tables.forEach(function(t){ t.seats.forEach(function(sid){ if(!c.seats[sid]&&list.length)c.seats[sid]=list.shift().id; }); });
+  }
+  /* 1. tables that already have a pinned student: add compatible tablemates */
+  shuffle(TABLES).forEach(function(t){
+    if(emptySeats(t).length===t.seats.length)return;
+    emptySeats(t).forEach(function(sid){
+      var p=take(function(s){return okFor(t,s.g)});
+      if(p)c.seats[sid]=p.id;
+    });
+  });
+  /* 2. fill the empty tables */
+  var free=TABLES.filter(function(t){return emptySeats(t).length===t.seats.length});
+  var B=pool.filter(function(s){return s.g==='b'}), G=pool.filter(function(s){return s.g==='g'}), U=pool.filter(function(s){return s.g==='?'});
+  var rem=[];
+  if(mode==='same'){
+    /* checkerboard: boy tables and girl tables alternate, so they are mixed in with each other */
+    var evenT=shuffle(free.filter(function(t){return (t.col+t.row)%2===0}));
+    var oddT=shuffle(free.filter(function(t){return (t.col+t.row)%2===1}));
+    if(Math.random()<0.5){ var tmp=evenT; evenT=oddT; oddT=tmp; }
+    var used={};
+    var claim=function(count,order){
+      var got=[],cap=0;
+      for(var i=0;i<order.length&&cap<count;i++){
+        var t=order[i]; if(used[t.id])continue;
+        used[t.id]=1; got.push(t); cap+=t.seats.length;
+      }
+      return got;
+    };
+    var bT=claim(B.length,evenT.concat(oddT));
+    var gT=claim(G.length,oddT.concat(evenT));
+    fill(bT,B); fill(gT,G);
+    fill(bT.concat(gT),U);
+    fill(shuffle(free.filter(function(t){return !used[t.id]})),U);
+    rem=B.concat(G,U);
+  } else if(mode==='mix'){
+    /* alternate boy, girl, boy, girl... down the tables so each table has both */
+    var seq=[], b=B.slice(), g=G.slice(), turnB=Math.random()<0.5;
+    while(b.length||g.length){
+      if(turnB&&b.length)seq.push(b.shift());
+      else if(!turnB&&g.length)seq.push(g.shift());
+      else if(b.length)seq.push(b.shift());
+      else seq.push(g.shift());
+      turnB=!turnB;
+    }
+    seq=seq.concat(U);
+    fill(shuffle(free),seq);
+    rem=seq;
+  } else {
+    var all=shuffle(B.concat(G,U));
+    fill(shuffle(free),all);
+    rem=all;
+  }
+  /* 3. anyone left goes into any open seat (prefer a compatible table) */
+  rem.forEach(function(s){
+    var best=null,any=null;
+    TABLES.forEach(function(t){
+      emptySeats(t).forEach(function(sid){
+        if(!any)any=sid;
+        if(!best&&okFor(t,s.g))best=sid;
+      });
+    });
+    var target=best||any;
+    if(target)c.seats[target]=s.id;
+  });
+  commit();
+  var seated={}; for(var kk in c.seats)seated[c.seats[kk]]=true;
+  var left=c.students.filter(function(s){return !seated[s.id]}).length;
+  var bad=0; TABLES.forEach(function(t){if(tableState(t).bad)bad++});
+  var msg='Seats arranged.';
+  if(left) msg+=' '+plural(left,'student')+' didn’t fit and '+(left===1?'is':'are')+' still on the list.';
+  if(bad) msg+=' '+plural(bad,'table')+' couldn’t follow the rule.';
+  toast(msg,'Undo',undo);
+}
+$('#btnArrange').onclick=autoArrange;
+
+/* ===================== chart management ===================== */
+$('#chartSelect').onchange=function(e){
+  store.current=e.target.value; resetHistory(); commit(); fitView();
+};
+$('#chartName').addEventListener('input',function(e){
+  cur().name=e.target.value.trim()||'Untitled chart';
+  cur().updated=Date.now(); scheduleSave();
+  var opt=$('#chartSelect').querySelector('option[value="'+store.current+'"]'); if(opt)opt.textContent=cur().name;
+  var bt=document.querySelector('#room .bt'); if(bt)bt.textContent=cur().name;
+});
+$('#chartName').addEventListener('blur',renderChartBar);
+$('#btnDup').onclick=function(){
+  var src=cur(), c=JSON.parse(JSON.stringify(src));
+  c.id=uid('c'); c.name=src.name+' (copy)'; c.created=c.updated=Date.now();
+  store.charts[c.id]=c; store.order.push(c.id); store.current=c.id; resetHistory(); commit();
+  toast('Duplicated. You’re now editing the copy.');
+};
+$('#btnNew').onclick=function(){
+  $('#newName').value=''; $('#newDlg').showModal(); setTimeout(function(){$('#newName').focus()},30);
+};
+function createChart(){
+  var nm=$('#newName').value.trim()||'Untitled chart';
+  var copy=document.querySelector('input[name=newFrom]:checked').value==='copy';
+  var src=cur(), c=newChart(nm);
+  if(copy) c.students=JSON.parse(JSON.stringify(src.students)); c.pairing=src.pairing;
+  store.charts[c.id]=c; store.order.push(c.id); store.current=c.id;
+  $('#newDlg').close(); resetHistory(); commit(); fitView();
+}
+$('#newGo').onclick=createChart;
+$('#newCancel').onclick=function(){$('#newDlg').close()};
+$('#newName').addEventListener('keydown',function(e){if(e.key==='Enter')createChart()});
+$('#btnDel').onclick=function(){
+  var c=cur();
+  confirmBox('Delete “'+c.name+'”?','This removes the chart and its roster from your saved charts. This can’t be undone.','Delete chart').then(function(ok){
+    if(!ok)return;
+    delete store.charts[c.id];
+    store.order=store.order.filter(function(id){return id!==c.id});
+    if(!store.order.length){ var n=newChart('My first chart'); store.charts[n.id]=n; store.order=[n.id]; }
+    store.current=store.order[0]; resetHistory(); commit();
+    toast('Chart deleted.');
+  });
+};
+
+/* ===================== add student ===================== */
+function splitName(full){
+  full=full.trim().replace(/\s+/g,' ');
+  if(full.indexOf(',')>-1){ var p=full.split(','); return {first:p.slice(1).join(' ').trim()||p[0].trim(), last:p.slice(1).join(' ').trim()?p[0].trim():''}; }
+  var i=full.lastIndexOf(' ');
+  return i<0?{first:full,last:''}:{first:full.slice(0,i),last:full.slice(i+1)};
+}
+$('#btnAdd').onclick=function(){
+  $('#addName').value=''; $('#addMsg').textContent='Press Enter to add and keep going.';
+  $('#addDlg').showModal(); setTimeout(function(){$('#addName').focus()},30);
+};
+function addOne(){
+  var v=$('#addName').value.trim(); if(!v)return;
+  var n=splitName(v), g=document.querySelector('input[name=addG]:checked').value;
+  snapshot();
+  cur().students.push({id:uid('s'),first:n.first,last:(n.last||'').charAt(0).toUpperCase(),g:g});
+  commit();
+  $('#addMsg').textContent='Added '+v+'.';
+  $('#addName').value=''; $('#addName').focus();
+}
+$('#addGo').onclick=addOne;
+$('#addDone').onclick=function(){$('#addDlg').close()};
+$('#addName').addEventListener('keydown',function(e){if(e.key==='Enter')addOne()});
+
+/* ===================== roster import ===================== */
+function parseDelimited(text){
+  text=text.replace(/^\uFEFF/,'');
+  var first=text.split(/\r?\n/).find(function(l){return l.trim()})||'';
+  var delim=',';
+  var counts={'\t':(text.match(/\t/g)||[]).length,';':(text.match(/;/g)||[]).length,',':(text.match(/,/g)||[]).length};
+  if(counts['\t']>0&&counts['\t']>=counts[','])delim='\t'; else if(counts[';']>counts[','])delim=';';
+  var rows=[],row=[],cell='',q=false;
+  for(var i=0;i<text.length;i++){
+    var ch=text[i];
+    if(q){
+      if(ch==='"'){ if(text[i+1]==='"'){cell+='"';i++} else q=false; }
+      else cell+=ch;
+    } else if(ch==='"'){ q=true; }
+    else if(ch===delim){ row.push(cell);cell=''; }
+    else if(ch==='\n'||ch==='\r'){
+      if(ch==='\r'&&text[i+1]==='\n')i++;
+      row.push(cell);cell='';rows.push(row);row=[];
+    } else cell+=ch;
+  }
+  if(cell!==''||row.length){row.push(cell);rows.push(row);}
+  return rows.map(function(r){return r.map(function(c){return c.trim()})}).filter(function(r){return r.some(function(c){return c})});
+}
+function gtoken(s){
+  s=String(s||'').trim().toLowerCase().replace(/\./g,'');
+  if(['m','male','boy','b','man'].indexOf(s)>-1)return 'b';
+  if(['f','female','girl','g','woman'].indexOf(s)>-1)return 'g';
+  if(['x','nb','nonbinary','non-binary','other','u','unknown','?','n/a','na'].indexOf(s)>-1)return '?';
+  return null;
+}
+/* School roster reports: lines like "Albers, Alexander L   M   06" (Last, First MiddleInitial Gender Grade). Everything else is ignored. */
+function parseReport(text){
+  var re=/^\s*([A-Za-z][^,\t]*?),\s*(.+?)\s+(M|F|Male|Female)\s+(\d{1,2}|K|PK|KG)(?:\s.*)?$/i;
+  var out=[];
+  text.split(/\r?\n/).forEach(function(l){
+    l=l.trim(); if(!l)return;
+    var m=re.exec(l); if(!m)return;
+    var rest=m[2].trim().split(/\s+/);
+    if(rest.length>1&&/^[A-Za-z]\.?$/.test(rest[rest.length-1]))rest.pop();
+    out.push({id:uid('s'),first:rest.join(' '),last:m[1].trim(),g:gtoken(m[3])||'?'});
+  });
+  return out.length>=2?out:[];
+}
+function parseRoster(text,lastFirst){
+  var rep=parseReport(text); if(rep.length)return rep;
+  var rows=parseDelimited(text), out=[];
+  if(!rows.length)return out;
+  var hdrRe=/^(first( ?name)?|last( ?name)?|name|student( ?name)?|full ?name|gender|sex|surname|given( ?name)?|fname|lname|preferred( ?name)?)$/i;
+  var hasHdr=rows[0].some(function(c){return hdrRe.test(c)}) && rows[0].every(function(c){return gtoken(c)===null||hdrRe.test(c)});
+  var fi=-1,li=-1,ni=-1,gi=-1;
+  if(hasHdr){
+    var h=rows.shift();
+    h.forEach(function(c,i){
+      var x=c.toLowerCase();
+      if(/^(first|given|fname|preferred)/.test(x))fi=i;
+      else if(/^(last|surname|lname)/.test(x))li=i;
+      else if(/^(full ?name|name|student)/.test(x))ni=i;
+      else if(/^(gender|sex)/.test(x))gi=i;
+    });
+  }
+  rows.forEach(function(r){
+    var first='',last='',g='?',n;
+    if(hasHdr){
+      if(gi>-1)g=gtoken(r[gi])||'?';
+      if(fi>-1||li>-1){ first=(r[fi]||'').trim(); last=(r[li]||'').trim(); }
+      else if(ni>-1){ n=splitName(r[ni]||''); first=n.first; last=n.last; }
+      else { n=splitName(r[0]||''); first=n.first; last=n.last; }
+    } else {
+      var cells=r.slice(), gIdx=-1;
+      if(cells.length>1){
+        for(var i=cells.length-1;i>0;i--){ if(gtoken(cells[i])!==null&&cells[i]!==''){gIdx=i;break;} }
+      }
+      if(gIdx>-1){ g=gtoken(cells[gIdx]); cells.splice(gIdx,1); }
+      cells=cells.filter(function(c){return c});
+      if(cells.length===1){
+        var words=cells[0].split(/\s+/), lastW=words[words.length-1];
+        if(words.length>=3&&/^(m|f|male|female|boy|girl)$/i.test(lastW)){ g=gtoken(lastW); cells[0]=words.slice(0,-1).join(' '); }
+        n=splitName(cells[0]); first=n.first; last=n.last;
+      }
+      else if(cells.length>=2){ if(lastFirst){last=cells[0];first=cells[1];} else {first=cells[0];last=cells[1];} }
+    }
+    if(first||last){ if(!first){first=last;last='';} out.push({id:uid('s'),first:first,last:last,g:g}); }
+  });
+  return out;
+}
+var parsed=[];
+function refreshImport(){
+  var lf=document.querySelector('input[name=nameOrder]:checked').value==='lf';
+  parsed=initialsOnly(parseRoster($('#importText').value,lf));
+  var pv=$('#importPreview');
+  if(!parsed.length){ pv.innerHTML='<span class="hint">Nothing to import yet. Choose a file or paste names above.</span>'; $('#impGo').disabled=true; return; }
+  var b=parsed.filter(function(s){return s.g==='b'}).length, g=parsed.filter(function(s){return s.g==='g'}).length, u=parsed.length-b-g;
+  pv.innerHTML='<div class="tally">'+plural(parsed.length,'student')+' found · '+b+' boys · '+g+' girls · '+u+' not set</div><ul>'
+    +parsed.slice(0,60).map(function(s){return '<li>'+esc(shortName(s))+' <span class="hint">'+(s.g==='b'?'B':s.g==='g'?'G':'')+'</span></li>'}).join('')
+    +(parsed.length>60?'<li class="hint">…and '+(parsed.length-60)+' more</li>':'')+'</ul>';
+  $('#impGo').disabled=false;
+}
+$('#btnImport').onclick=function(){
+  $('#importText').value=''; $('#fileInput').value='';
+  document.querySelector('input[name=impMode][value='+(cur().students.length?'add':'replace')+']').checked=true;
+  refreshImport(); $('#importDlg').showModal();
+};
+$('#btnPickFile').onclick=function(){$('#fileInput').click()};
+var PDFJS_BASE='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+function loadPdfJs(){
+  if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
+  return new Promise(function(res,rej){
+    var s=document.createElement('script');
+    s.src=PDFJS_BASE+'pdf.min.js';
+    s.onload=function(){
+      if(window.pdfjsLib){ window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS_BASE+'pdf.worker.min.js'; res(window.pdfjsLib); }
+      else rej(new Error('pdf.js missing'));
+    };
+    s.onerror=function(){rej(new Error('pdf.js failed to load'))};
+    document.head.appendChild(s);
+  });
+}
+function itemsToLines(items){
+  var rows=[];
+  items.forEach(function(it){
+    if(!it.str||!it.str.trim())return;
+    var x=it.transform[4], y=it.transform[5], row=null;
+    for(var i=0;i<rows.length;i++){ if(Math.abs(rows[i].y-y)<3){row=rows[i];break;} }
+    if(!row){row={y:y,items:[]};rows.push(row);}
+    row.items.push({x:x,w:it.width||0,s:it.str.trim()});
+  });
+  rows.sort(function(a,b){return b.y-a.y});
+  return rows.map(function(r){
+    r.items.sort(function(a,b){return a.x-b.x});
+    var out='', prevEnd=null;
+    r.items.forEach(function(it){
+      if(prevEnd!==null){ var gap=it.x-prevEnd; out+= gap>12?'\t':' '; }
+      out+=it.s; prevEnd=it.x+it.w;
+    });
+    return out;
+  }).join('\n');
+}
+function pdfToText(file){
+  return loadPdfJs().then(function(lib){
+    return file.arrayBuffer().then(function(buf){return lib.getDocument({data:buf}).promise}).then(function(doc){
+      var pages=[], p=Promise.resolve();
+      for(var i=1;i<=doc.numPages;i++){
+        (function(n){
+          p=p.then(function(){return doc.getPage(n)}).then(function(pg){return pg.getTextContent()}).then(function(tc){pages.push(itemsToLines(tc.items))});
+        })(i);
+      }
+      return p.then(function(){return pages.join('\n')});
+    });
+  });
+}
+function readFile(f){
+  if(!f)return;
+  if(/\.pdf$/i.test(f.name)||f.type==='application/pdf'){
+    $('#importPreview').innerHTML='<span class="hint">Reading the PDF…</span>';
+    pdfToText(f).then(function(t){
+      if(!t.trim()){ $('#importText').value=''; refreshImport(); toast('That PDF has no selectable text (it may be a scan). Try a text-based PDF, or paste the names instead.'); return; }
+      $('#importText').value=t; refreshImport();
+      toast('PDF read. Check the list below and delete any extra lines, such as titles or page numbers, before importing.');
+    }).catch(function(){
+      refreshImport();
+      toast('The PDF couldn’t be read here. Try copying the names out of it and pasting them, or save it as .csv or .txt.');
+    });
+    return;
+  }
+  var r=new FileReader();
+  r.onload=function(){ $('#importText').value=String(r.result); refreshImport(); };
+  r.onerror=function(){ toast('That file couldn’t be read. Try saving it as .csv or .txt.'); };
+  r.readAsText(f);
+}
+$('#fileInput').onchange=function(e){readFile(e.target.files[0])};
+$('#importText').addEventListener('input',refreshImport);
+document.querySelectorAll('input[name=nameOrder]').forEach(function(r){r.addEventListener('change',refreshImport)});
+var dz=$('#dropzone');
+['dragenter','dragover'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('over')})});
+['dragleave','drop'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove('over')})});
+dz.addEventListener('drop',function(e){ var f=e.dataTransfer&&e.dataTransfer.files[0]; readFile(f); });
+$('#impCancel').onclick=function(){$('#importDlg').close()};
+$('#impGo').onclick=function(){
+  if(!parsed.length)return;
+  var c=cur(), mode=document.querySelector('input[name=impMode]:checked').value;
+  snapshot();
+  if(mode==='replace'){ c.students=[]; c.seats={}; c.pinned={}; }
+  c.students=c.students.concat(parsed);
+  $('#importDlg').close(); commit();
+  toast(plural(parsed.length,'student')+' imported.'+(MAXSEATS>2?' Tables now seat groups of 3 so everyone fits.':''),'Undo',undo);
+};
+
+/* ===================== CSV export ===================== */
+$('#btnCsv').onclick=function(){
+  var c=cur(), rows=[['Table','Seat','Last initial','First name','Gender']];
+  var q=function(v){v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  var seatedIds={};
+  TABLES.forEach(function(t){
+    t.seats.forEach(function(sid,i){
+      var s=stuById(c.seats[sid]);
+      if(s){ seatedIds[s.id]=1; rows.push([t.id,'Seat '+(i+1),s.last,s.first,gname(s.g)]); }
+    });
+  });
+  c.students.forEach(function(s){ if(!seatedIds[s.id])rows.push(['','',s.last,s.first,gname(s.g)]); });
+  var csv=rows.map(function(r){return r.map(q).join(',')}).join('\r\n');
+  var fname=(c.name.replace(/[^\w\- ]+/g,'').trim()||'seating-chart')+'.csv';
+  waitForClaude(200).then(function(cl){
+    if(!cl)return toast('Saving files isn’t available in this view.');
+    return cl.use('downloads').then(function(dl){
+      if(!dl)return toast('Saving files isn’t available in this view.');
+      return dl.save({filename:fname,data:csv}).catch(function(err){
+        if(err&&err.code==='declined')return;
+        toast('The file couldn’t be saved here.');
+      });
+    });
+  });
+};
+
+/* ===================== print & PDF ===================== */
+var printState=null;
+function beforePrint(){
+  if(printState)return;
+  printState={zoom:zoom,minW:room.style.minWidth,minH:room.style.minHeight};
+  app.classList.add('printing');
+  room.style.minWidth=''; room.style.minHeight='';
+  zoom=Math.min(960/room.offsetWidth,700/room.offsetHeight);
+  applyZoom();
+}
+function afterPrint(){
+  if(!printState)return;
+  app.classList.remove('printing');
+  room.style.minWidth=printState.minW; room.style.minHeight=printState.minH;
+  zoom=printState.zoom; printState=null; applyZoom();
+}
+window.addEventListener('beforeprint',beforePrint);
+window.addEventListener('afterprint',afterPrint);
+$('#btnPrint').onclick=function(){
+  var fired=false, mark=function(){fired=true};
+  window.addEventListener('beforeprint',mark,{once:true});
+  try{ window.print(); }catch(e){}
+  setTimeout(function(){
+    window.removeEventListener('beforeprint',mark);
+    if(!fired)toast('Printing isn’t available in this view. Use Save PDF, then print the file.');
+  },900);
+};
+
+function loadJsPdf(){
+  if(window.jspdf&&window.jspdf.jsPDF)return Promise.resolve(window.jspdf.jsPDF);
+  return new Promise(function(res,rej){
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=function(){ (window.jspdf&&window.jspdf.jsPDF)?res(window.jspdf.jsPDF):rej(new Error('jsPDF missing')); };
+    s.onerror=function(){rej(new Error('jsPDF failed to load'))};
+    document.head.appendChild(s);
+  });
+}
+function fitText(doc,txt,maxW,start,min){
+  var s=start; doc.setFontSize(s);
+  while(doc.getTextWidth(txt)>maxW&&s>min){ s-=0.5; doc.setFontSize(s); }
+  return s;
+}
+function buildPdf(JsPDF){
+  var c=cur(), doc=new JsPDF({orientation:'landscape',unit:'pt',format:'letter'});
+  var W=792,H=612,M=28,GX=14,GY=10;
+  var COLORS=['#C8102E','#1F6FB5','#1F7A4D','#7B3FA8'];
+  doc.setFillColor('#C8102E'); doc.roundedRect(M,M,W-2*M,40,6,6,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
+  var title='FRONT OF ROOM   |   '+c.name;
+  fitText(doc,title,W-2*M-24,20,10);
+  doc.text(title,W/2,M+26,{align:'center'});
+  var top=M+40+12, labH=18, footH=30;
+  var colW=(W-2*M-3*GX)/4, gridTop=top+labH+6, availH=H-M-footH-gridTop;
+  var sr=Math.ceil(MAXSEATS/2); var tH=Math.min(20+sr*54+(sr-1)*4,(availH-(TPC-1)*GY)/TPC);
+  for(var col=0;col<COLS;col++){
+    var x=M+col*(colW+GX), cc=COLORS[col];
+    doc.setFillColor(cc); doc.roundedRect(x,top,colW,labH,4,4,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text('Column '+LETTERS[col],x+colW/2,top+12.5,{align:'center'});
+    for(var r=0;r<TPC;r++){
+      var t=TABLES[col*TPC+r], y=gridTop+r*(tH+GY);
+      doc.setDrawColor(cc); doc.setLineWidth(1.5); doc.setFillColor(255,255,255);
+      doc.roundedRect(x,y,colW,tH,6,6,'FD');
+      doc.setTextColor(cc); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+      doc.text(t.id,x+7,y+11);
+      var sw=(colW-12-4)/2, sh=(tH-20-(sr-1)*4)/sr;
+      for(var s=0;s<t.seats.length;s++){
+        var rowI=Math.floor(s/2), inRow=Math.min(2,t.seats.length-rowI*2);
+        var sx=x+6+(inRow===1?(sw+4)/2:(s%2)*(sw+4)), sy=y+16+rowI*(sh+4), stu=stuById(c.seats[t.seats[s]]);
+        if(stu){
+          doc.setFillColor(cc); doc.roundedRect(sx,sy,sw,sh,4,4,'F');
+          doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
+          var nm=shortName(stu); fitText(doc,nm,sw-8,16,6);
+          doc.text(nm,sx+sw/2,sy+sh/2,{align:'center',baseline:'middle'});
+        } else {
+          doc.setDrawColor(190,190,190); doc.setLineWidth(0.75); doc.setFillColor(245,245,245);
+          doc.roundedRect(sx,sy,sw,sh,4,4,'FD');
+        }
+      }
+    }
+  }
+  var seated={}; for(var k in c.seats)seated[c.seats[k]]=1;
+  var un=c.students.filter(function(s){return !seated[s.id]}).map(shortName).join(', ');
+  doc.setTextColor(110); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text('Mr. Williams Seating Chart Maker  -  '+new Date().toLocaleDateString(),M,H-M+2);
+  if(un){ var line='Not seated: '+un; fitText(doc,line,W-2*M,8,5); doc.text(line,M,H-M-9); }
+  return doc;
+}
+$('#btnPdf').onclick=function(){
+  loadJsPdf().then(function(J){
+    var buf=buildPdf(J).output('arraybuffer');
+    var fname=(cur().name.replace(/[^\w\- ]+/g,'').trim()||'seating-chart')+'.pdf';
+    return waitForClaude(200).then(function(cl){
+      if(!cl)throw new Error('no runtime');
+      return cl.use('downloads');
+    }).then(function(dl){
+      if(!dl)throw new Error('no downloads');
+      return dl.save({filename:fname,data:buf});
+    });
+  }).catch(function(err){
+    if(err&&err.code==='declined')return;
+    toast('The PDF couldn’t be made or saved here. Try again in a moment.');
+  });
+};
+
+/* ===================== keyboard ===================== */
+document.addEventListener('keydown',function(e){
+  var tag=(e.target.tagName||'').toLowerCase();
+  var typing=tag==='input'||tag==='textarea'||tag==='select';
+  if(e.key==='Escape'&&app.classList.contains('expanded')&&!document.querySelector('dialog[open]')){ setExpanded(false); return; }
+  if(typing||document.querySelector('dialog[open]'))return;
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){ e.preventDefault(); redo(); return; }
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==='+'||e.key==='=')setZoom(zoom*1.15);
+  else if(e.key==='-'||e.key==='_')setZoom(zoom/1.15);
+  else if(e.key==='0')fitView();
+  else if(e.key.toLowerCase()==='f')toggleFs();
+});
+
+window.addEventListener('resize',function(){ if(app.classList.contains('is-fs')||app.classList.contains('expanded'))fitView(); else applyZoom(); });
+
+/* ===================== start ===================== */
+renderAll();
+setSaveText('saved');
+requestAnimationFrame(function(){ fitView(); setTimeout(fitView,350); });
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fitNames();applyZoom();});
+initCloud();
+})();
+</script>
+</body>
+</html>

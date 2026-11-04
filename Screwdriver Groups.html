@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Screwdriver Groups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f6f6f4;
+  --surface: #ffffff;
+  --surface-2: #efefec;
+  --ink: #1b1d22;
+  --ink-soft: #565b66;
+  --line: #d9d9d4;
+  --a: #b3122b;
+  --a-soft: #fbe6e9;
+  --a-ink: #ffffff;
+  --b: #243b63;
+  --b-soft: #e4eaf4;
+  --b-ink: #ffffff;
+  --focus: #e8a100;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #14161a; --surface: #1d2026; --surface-2: #272b33;
+    --ink: #f1f1ee; --ink-soft: #a6abb6; --line: #343944;
+    --a: #e0475d; --a-soft: #3a1a20; --a-ink: #ffffff;
+    --b: #7ea0dd; --b-soft: #1d2840; --b-ink: #10151f;
+    --focus: #f2b632;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14161a; --surface: #1d2026; --surface-2: #272b33;
+  --ink: #f1f1ee; --ink-soft: #a6abb6; --line: #343944;
+  --a: #e0475d; --a-soft: #3a1a20; --a-ink: #ffffff;
+  --b: #7ea0dd; --b-soft: #1d2840; --b-ink: #10151f;
+  --focus: #f2b632;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px; line-height: 1.45;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding: 20px 16px 56px; }
+h1, h2, h3 { font-family: "Barlow Condensed", "Arial Narrow", Impact, sans-serif; margin: 0; letter-spacing: .01em; }
+h1 { font-size: 2rem; font-weight: 700; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+button, textarea, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.sub { color: var(--ink-soft); margin: 2px 0 0; }
+.btn {
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px;
+  padding: 8px 14px; cursor: pointer; font-weight: 500; min-height: 40px;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.nav input[type=date] { background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px; padding: 7px 10px; min-height: 40px; }
+
+/* Day panel */
+.day { border-radius: 14px; overflow: hidden; border: 2px solid var(--setc); background: var(--surface); margin-bottom: 26px; }
+.day.A { --setc: var(--a); --setsoft: var(--a-soft); --setink: var(--a-ink); }
+.day.B { --setc: var(--b); --setsoft: var(--b-soft); --setink: var(--b-ink); }
+.day-head { background: var(--setc); color: var(--setink); padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; }
+.day-head h2 { font-size: 2.2rem; font-weight: 700; }
+.day-head .set { font-family: "Barlow Condensed", sans-serif; font-size: 1.4rem; font-weight: 600; }
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; padding: 18px; }
+.group { background: var(--setsoft); border-radius: 10px; padding: 14px 16px; }
+.group h3 { font-size: 1.6rem; font-weight: 600; margin-bottom: 10px; overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  width: 46px; height: 46px; border-radius: 50%; background: var(--setc); color: var(--setink);
+  display: grid; place-items: center; font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 1.5rem;
+  box-shadow: inset 0 0 0 3px var(--setsoft), inset 0 0 0 5px var(--setc);
+}
+.count { margin-top: 8px; color: var(--ink-soft); font-size: .9rem; }
+.note { padding: 18px 20px; color: var(--ink-soft); }
+.warn { background: var(--surface-2); border-left: 4px solid var(--focus); padding: 10px 14px; margin: 0 18px 18px; border-radius: 6px; }
+
+/* Week */
+.section-title { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+.week { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.wd { background: var(--surface); border: 1.5px solid var(--line); border-top: 6px solid var(--setc); border-radius: 10px; padding: 10px 12px; cursor: pointer; text-align: left; }
+.wd.A { --setc: var(--a); } .wd.B { --setc: var(--b); }
+.wd.sel { outline: 3px solid var(--ink); outline-offset: 1px; }
+.wd .dn { font-family: "Barlow Condensed", sans-serif; font-size: 1.25rem; font-weight: 700; }
+.wd .dd { color: var(--ink-soft); font-size: .85rem; }
+.wd .badge { display: inline-block; margin: 6px 0; font-weight: 600; color: var(--setc); }
+.wd ul { list-style: none; margin: 0; padding: 0; font-size: .88rem; }
+.wd li { padding: 2px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.wd li span { color: var(--ink-soft); }
+.fri { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 30px; }
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 7px 14px; cursor: pointer; font-weight: 600; min-height: 38px; }
+.seg button[aria-pressed="true"].a { background: var(--a); color: var(--a-ink); }
+.seg button[aria-pressed="true"].b { background: var(--b); color: var(--b-ink); }
+
+.bonus-head { padding: 4px 20px 0; font-family: "Barlow Condensed", sans-serif; font-size: 1.5rem; font-weight: 600; border-top: 1.5px dashed var(--line); padding-top: 14px; }
+.group.fromA { --setc: var(--a); --setsoft: var(--a-soft); --setink: var(--a-ink); }
+.group.fromB { --setc: var(--b); --setsoft: var(--b-soft); --setink: var(--b-ink); }
+body.fs .bonus-head { font-size: clamp(1.6rem, 3vw, 2.4rem); padding-left: 28px; }
+
+/* Setup */
+.setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 16px; }
+.card.A { border-top: 6px solid var(--a); } .card.B { border-top: 6px solid var(--b); }
+.card h3 { font-size: 1.4rem; }
+.card p { margin: 2px 0 10px; color: var(--ink-soft); font-size: .92rem; }
+textarea { width: 100%; min-height: 150px; resize: vertical; background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 10px; }
+.tools-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.tools-row input { width: 70px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+
+/* Full screen mode: big, projector-friendly day view */
+body.fs { background: var(--bg); min-height: 100vh; }
+body.fs .wrap { max-width: none; padding: 14px 20px 24px; }
+body.fs h1, body.fs .sub, body.fs .section-title, body.fs .week, body.fs .fri, body.fs .setup, body.fs .tools-row, body.fs #print { display: none; }
+body.fs .top { justify-content: flex-end; margin-bottom: 10px; }
+body.fs .day { margin-bottom: 0; }
+body.fs .day-head { padding: 18px 28px; }
+body.fs .day-head h2 { font-size: clamp(2.4rem, 6vw, 4.5rem); }
+body.fs .day-head .set { font-size: clamp(1.5rem, 3vw, 2.4rem); }
+body.fs .groups { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 24px; }
+body.fs .group { padding: 20px 24px; }
+body.fs .group h3 { font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: 16px; }
+body.fs .chip { width: clamp(56px, 7vw, 92px); height: clamp(56px, 7vw, 92px); font-size: clamp(1.9rem, 3.5vw, 3rem); }
+body.fs .chips { gap: 12px; }
+body.fs .count { font-size: 1.2rem; margin-top: 12px; }
+
+@media (max-width: 760px) {
+  .week { grid-template-columns: 1fr; }
+  .day-head h2 { font-size: 1.8rem; }
+}
+@media print {
+  body { background: #fff; color: #000; }
+  .nav, .fri, .setup, .tools-row, .noprint { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Screwdriver Groups</h1>
+      <p class="sub" id="toolsLine"></p>
+    </div>
+    <div class="nav" role="group" aria-label="Choose a day">
+      <button class="btn" id="prev" aria-label="Previous school day">Previous day</button>
+      <button class="btn primary" id="today">Today</button>
+      <button class="btn" id="next" aria-label="Next school day">Next day</button>
+      <input type="date" id="picker" aria-label="Pick a date">
+      <button class="btn noprint" id="reshuffle">Reshuffle bonus groups</button>
+      <button class="btn noprint" id="fs" aria-pressed="false">Full screen</button>
+      <button class="btn noprint" id="print">Print</button>
+    </div>
+  </div>
+
+  <section id="dayPanel" aria-live="polite"></section>
+
+  <div class="section-title">
+    <h2>This week</h2>
+  </div>
+  <div class="week" id="week"></div>
+  <div class="fri noprint" id="friBox"></div>
+
+  <div class="section-title"><h2>Groups</h2></div>
+  <div class="setup">
+    <div class="card A">
+      <h3>Set A: Monday and Wednesday</h3>
+      <p>One group name per line.</p>
+      <textarea id="setA" aria-label="Set A group names" placeholder="Group 1&#10;Group 2&#10;Group 3&#10;Group 4"></textarea>
+    </div>
+    <div class="card B">
+      <h3>Set B: Tuesday and Thursday</h3>
+      <p>One group name per line.</p>
+      <textarea id="setB" aria-label="Set B group names" placeholder="Group 5&#10;Group 6&#10;Group 7&#10;Group 8"></textarea>
+    </div>
+  </div>
+  <div class="tools-row">
+    <label for="toolCount">Number of screwdrivers</label>
+    <input type="number" id="toolCount" min="1" max="60" value="8">
+  </div>
+</div>
+
+<script>
+(function () {
+  var REF = new Date(2024, 0, 1); // a Monday, anchor for week counting
+  var DAY_MS = 864e5;
+  var DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  var state = { setA: [], setB: [], tools: 8, flip: 0, bumps: {} };
+  var selected = new Date();
+
+  // ---- storage (per browser; may be empty) ----
+  function load() {
+    try {
+      var raw = localStorage.getItem("screwdriverGroups.v1");
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && typeof s === "object") {
+          state.setA = Array.isArray(s.setA) ? s.setA : [];
+          state.setB = Array.isArray(s.setB) ? s.setB : [];
+          state.tools = Number(s.tools) > 0 ? Number(s.tools) : 8;
+          state.flip = s.flip === 1 ? 1 : 0;
+          state.bumps = s.bumps && typeof s.bumps === "object" ? s.bumps : {};
+        }
+      }
+    } catch (e) {}
+  }
+  function save() {
+    try { localStorage.setItem("screwdriverGroups.v1", JSON.stringify(state)); } catch (e) {}
+  }
+
+  // ---- date helpers ----
+  function strip(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n) { var x = strip(d); x.setDate(x.getDate() + n); return x; }
+  function mondayOf(d) { var x = strip(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+  function weekIdx(d) { return Math.round((mondayOf(d) - REF) / (7 * DAY_MS)); }
+  function isWeekend(d) { var w = d.getDay(); return w === 0 || w === 6; }
+  function toSchoolDay(d, dir) {
+    var x = strip(d);
+    while (isWeekend(x)) x = addDays(x, dir);
+    return x;
+  }
+  function fmtLong(d) { return DAYS[d.getDay()] + ", " + MONTHS[d.getMonth()] + " " + d.getDate(); }
+  function fmtShort(d) { return MONTHS[d.getMonth()] + " " + d.getDate(); }
+  function iso(d) {
+    var m = d.getMonth() + 1, day = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
+  }
+  function parseIso(s) {
+    var p = s.split("-");
+    return new Date(+p[0], +p[1] - 1, +p[2]);
+  }
+
+  // ---- assignment logic ----
+  function setFor(d) {
+    var w = d.getDay();
+    if (w === 1 || w === 3) return "A";
+    if (w === 2 || w === 4) return "B";
+    if (w === 5) return (((weekIdx(d) + state.flip) % 2) + 2) % 2 === 0 ? "A" : "B";
+    return null;
+  }
+  // Seeded random so a day's split stays the same on every refresh
+  function rng(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    var a = h;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function seedFor(d) {
+    return iso(d) + "|" + (state.bumps[iso(d)] || 0) + "|" + setFor(d);
+  }
+  // One screwdriver per group in today's set; extras go to random groups from the other set
+  function plan(d) {
+    var s = setFor(d), o = s === "A" ? "B" : "A";
+    var mine = s === "A" ? state.setA : state.setB;
+    var other = s === "A" ? state.setB : state.setA;
+    var n = state.tools, r = rng(seedFor(d));
+    function shuffled(len) {
+      var a = [], i, j, t;
+      for (i = 0; i < len; i++) a.push(i);
+      for (i = len - 1; i > 0; i--) { j = Math.floor(r() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
+      return a;
+    }
+    var main = [], bonus = [], next = 1, leftover = 0, dropped = 0, chosen = {};
+    if (mine.length > n) {
+      shuffled(mine.length).slice(0, n).forEach(function (k) { chosen[k] = 1; });
+      dropped = mine.length - n;
+    }
+    mine.forEach(function (name, k) {
+      var has = mine.length <= n || chosen[k];
+      main.push({ name: name, tools: has ? [next++] : [] });
+    });
+    var rem = n - Math.min(n, mine.length);
+    if (rem > 0 && mine.length) {
+      var pick = shuffled(other.length).slice(0, rem).sort(function (a, b) { return a - b; });
+      pick.forEach(function (k) { bonus.push({ name: other[k], tools: [next++] }); });
+      leftover = rem - pick.length;
+    }
+    return { s: s, o: o, main: main, bonus: bonus, leftover: leftover, dropped: dropped,
+             mineCount: mine.length, otherCount: other.length };
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function range(tools) {
+    if (!tools.length) return "none";
+    if (tools.length === 1) return "#" + tools[0];
+    return "#" + tools[0] + "\u2013" + tools[tools.length - 1];
+  }
+
+  // ---- render ----
+  function chipsHtml(g) {
+    var h = '<div class="chips" role="list" aria-label="Screwdriver for ' + esc(g.name) + '">';
+    g.tools.forEach(function (t) { h += '<span class="chip" role="listitem">' + t + '</span>'; });
+    return h + '</div>';
+  }
+  function renderDay() {
+    var panel = document.getElementById("dayPanel");
+    var p = plan(selected), s = p.s;
+    var html = '<div class="day ' + s + '">';
+    html += '<div class="day-head"><h2>' + fmtLong(selected) + '</h2><span class="set">Set ' + s +
+            (s === "A" ? " (Mon/Wed)" : " (Tue/Thu)");
+    if (selected.getDay() === 5) html += " \u2022 Friday rotation";
+    html += '</span></div>';
+    if (!p.main.length) {
+      html += '<p class="note">No groups entered for Set ' + s + ' yet. Type group names in the Groups section below.</p>';
+    } else {
+      html += '<div class="groups">';
+      p.main.forEach(function (g) {
+        html += '<div class="group"><h3>' + esc(g.name) + '</h3>';
+        if (g.tools.length) html += chipsHtml(g) + '<div class="count">1 screwdriver</div>';
+        else html += '<div class="count">No screwdriver today</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      if (p.dropped > 0) {
+        html += '<p class="warn">Set ' + s + ' has ' + p.mineCount + ' groups but only ' + state.tools +
+                ' screwdrivers, so ' + p.dropped + ' randomly chosen group(s) go without today.</p>';
+      }
+      if (p.bonus.length) {
+        html += '<div class="bonus-head">Bonus groups from Set ' + p.o + ' (extra screwdrivers)</div>';
+        html += '<div class="groups">';
+        p.bonus.forEach(function (g) {
+          html += '<div class="group from' + p.o + '"><h3>' + esc(g.name) + '</h3>' + chipsHtml(g) +
+                  '<div class="count">Set ' + p.o + ' bonus</div></div>';
+        });
+        html += '</div>';
+      }
+      if (p.leftover > 0) {
+        html += '<p class="warn">' + p.leftover + (p.leftover === 1 ? ' screwdriver is' : ' screwdrivers are') +
+                ' not assigned because Set ' + p.o + ' has no more groups' +
+                (p.otherCount === 0 ? '. Enter Set ' + p.o + ' groups below to hand them out.' : '.') + '</p>';
+      }
+    }
+    html += '</div>';
+    panel.innerHTML = html;
+  }
+
+  function renderWeek() {
+    var mon = mondayOf(selected), html = "";
+    for (var i = 0; i < 5; i++) {
+      var d = addDays(mon, i), s = setFor(d);
+      var p = plan(d);
+      var sel = iso(d) === iso(selected) ? " sel" : "";
+      html += '<button class="wd ' + s + sel + '" data-date="' + iso(d) + '" aria-label="' + fmtLong(d) + ', Set ' + s + '">';
+      html += '<div class="dn">' + DAYS[d.getDay()] + '</div><div class="dd">' + fmtShort(d) + '</div>';
+      html += '<div class="badge">Set ' + s + '</div><ul>';
+      if (!p.main.length) html += '<li><span>No groups yet</span></li>';
+      p.main.forEach(function (g) { html += '<li>' + esc(g.name) + ' <span>' + range(g.tools) + '</span></li>'; });
+      p.bonus.forEach(function (g) { html += '<li style="color:var(--' + p.o.toLowerCase() + ')">+ ' + esc(g.name) + ' <span>' + range(g.tools) + '</span></li>'; });
+      html += '</ul></button>';
+    }
+    document.getElementById("week").innerHTML = html;
+
+    var fri = addDays(mon, 4), fs = setFor(fri);
+    document.getElementById("friBox").innerHTML =
+      '<strong>Friday of this week (' + fmtShort(fri) + ') goes to:</strong>' +
+      '<span class="seg" role="group" aria-label="Friday set">' +
+      '<button class="a" data-fri="A" aria-pressed="' + (fs === "A") + '">Set A</button>' +
+      '<button class="b" data-fri="B" aria-pressed="' + (fs === "B") + '">Set B</button></span>' +
+      '<span style="color:var(--ink-soft)">Fridays then alternate every week.</span>';
+  }
+
+  function renderTop() {
+    document.getElementById("toolsLine").textContent =
+      state.tools + " screwdrivers. Each group in the day\u2019s set gets one, and extras go to random groups from the other set.";
+    document.getElementById("picker").value = iso(selected);
+  }
+
+  function renderAll() { renderTop(); renderDay(); renderWeek(); }
+
+  // ---- events ----
+  function parseLines(t) {
+    return t.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+  function go(d) { selected = d; renderAll(); }
+
+  document.getElementById("prev").onclick = function () { go(toSchoolDay(addDays(selected, -1), -1)); };
+  document.getElementById("next").onclick = function () { go(toSchoolDay(addDays(selected, 1), 1)); };
+  document.getElementById("today").onclick = function () { go(toSchoolDay(new Date(), 1)); };
+  document.getElementById("print").onclick = function () { window.print(); };
+
+  document.getElementById("reshuffle").onclick = function () {
+    var k = iso(selected);
+    state.bumps[k] = (state.bumps[k] || 0) + 1;
+    save(); renderAll();
+  };
+
+  var fsBtn = document.getElementById("fs");
+  function setFs(on) {
+    document.body.classList.toggle("fs", on);
+    fsBtn.textContent = on ? "Exit full screen" : "Full screen";
+    fsBtn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  fsBtn.onclick = function () {
+    var on = !document.body.classList.contains("fs");
+    setFs(on);
+    try {
+      if (on) {
+        var p = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+        if (p && p.catch) p.catch(function () {});
+      } else if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+    } catch (e) {}
+  };
+  document.addEventListener("fullscreenchange", function () {
+    if (!document.fullscreenElement) setFs(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && document.body.classList.contains("fs")) setFs(false);
+  });
+  document.getElementById("picker").onchange = function (e) {
+    if (e.target.value) go(toSchoolDay(parseIso(e.target.value), 1));
+  };
+  document.getElementById("week").onclick = function (e) {
+    var b = e.target.closest("[data-date]");
+    if (b) go(parseIso(b.getAttribute("data-date")));
+  };
+  document.getElementById("friBox").onclick = function (e) {
+    var b = e.target.closest("[data-fri]");
+    if (!b) return;
+    var want = b.getAttribute("data-fri") === "A" ? 0 : 1;
+    var fri = addDays(mondayOf(selected), 4);
+    state.flip = (((want - weekIdx(fri)) % 2) + 2) % 2;
+    save(); renderAll();
+  };
+  document.getElementById("setA").oninput = function (e) {
+    state.setA = parseLines(e.target.value); save(); renderDay(); renderWeek();
+  };
+  document.getElementById("setB").oninput = function (e) {
+    state.setB = parseLines(e.target.value); save(); renderDay(); renderWeek();
+  };
+  document.getElementById("toolCount").oninput = function (e) {
+    var n = parseInt(e.target.value, 10);
+    if (n > 0 && n <= 60) { state.tools = n; save(); renderAll(); }
+  };
+
+  // ---- init ----
+  load();
+  document.getElementById("setA").value = state.setA.join("\n");
+  document.getElementById("setB").value = state.setB.join("\n");
+  document.getElementById("toolCount").value = state.tools;
+  selected = toSchoolDay(new Date(), 1);
+  renderAll();
+})();
+</script>
+</body>
+</html>
