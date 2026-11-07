@@ -28,6 +28,9 @@ const fallback=[
 "Screwdriver Groups.html"
 ];
 const grid=document.getElementById("tools"),search=document.getElementById("search"),count=document.getElementById("count"),status=document.getElementById("status");
+// Tools that must open somewhere other than this repository. Rubrics grades with Claude,
+// which only works in its published Claude artifact, so its card opens that instead.
+const links={"rubrics.html":"https://claude.ai/artifact/QoN3GqZntmhEa5m6pnwQE3"};
 let names=fallback;
 function label(name){return name.replace(/\.html?$/i,"").replace(/[_-]+/g," ").trim()}
 function emoji(name){const s=name.toLowerCase();if(s.includes("wheel"))return "🎡";if(s.includes("expo"))return "🛠️";if(s.includes("seat"))return "🪑";if(s.includes("rubric"))return "📋";if(s.includes("screwdriver"))return "🔧";if(s.includes("robot"))return "🤖";if(s.includes("medical")||s.includes("brain"))return "🧠";if(s.includes("science"))return "🔬";return "📚"}
@@ -37,7 +40,9 @@ const filtered=names.filter(n=>label(n).toLowerCase().includes(q));
 grid.replaceChildren();
 for(const name of filtered){
 const a=document.createElement("a");a.className="card";
-a.href="./"+encodeURIComponent(name);
+const ext=links[name.toLowerCase()];
+a.href=ext||"./"+encodeURIComponent(name);
+if(ext){a.target="_blank";a.rel="noopener"}
 const symbol=document.createElement("div");symbol.className="symbol";symbol.textContent=emoji(name);
 const title=document.createElement("div");title.className="name";title.textContent=label(name);
 const open=document.createElement("div");open.className="open";open.textContent="Open tool →";
