@@ -129,14 +129,15 @@ button{cursor:pointer}
 .tseats .seat:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 3px)}
 .seat.over{background:var(--accent-tint);border-color:var(--accent);border-style:solid}
 .seat .open{align-self:center;justify-self:center;font-size:15px;color:var(--muted)}
-.seat .chip{min-width:0;max-width:100%;padding-left:12px;gap:10px;background:var(--cc,var(--chip));border-color:rgba(255,255,255,.3);color:#fff}
+.seat .chip{min-width:0;max-width:100%;padding-left:12px;gap:10px;background:var(--cc,var(--chip));border-color:rgba(255,255,255,.3);color:var(--ci,#fff)}
 .seat .chip.g-b,.seat .chip.g-g,.seat .chip.g-u{border-left-color:rgba(255,255,255,.3)}
-.seat .chip .gb{background:#fff;color:var(--cc,#333)}
-.seat .pinmark{color:#fff}
-.seat .nm b{font-size:30px;font-weight:700;line-height:1.1;color:#fff}
-.ghost.seatghost{background:var(--cc);color:#fff;border-color:rgba(255,255,255,.4)}
-.ghost.seatghost .nm b{font-size:26px!important;color:#fff}
-.ghost.seatghost .gb{background:#fff;color:var(--cc)}
+.seat .chip .gb{background:var(--ci,#fff);color:var(--cc,#333)}
+.seat .pinmark{color:var(--ci,#fff)}
+.seat .nm b{font-size:30px;font-weight:700;line-height:1.1;color:var(--ci,#fff)}
+.seat .nm i{font-size:14px;font-weight:600;color:var(--ci,#fff);opacity:.85}
+.ghost.seatghost{background:var(--cc);color:var(--ci,#fff);border-color:rgba(255,255,255,.4)}
+.ghost.seatghost .nm b{font-size:26px!important;color:var(--ci,#fff)}
+.ghost.seatghost .gb{background:var(--ci,#fff);color:var(--cc)}
 .seat .gb{width:26px;height:26px;font-size:13px}
 .ghost .nm b{font-size:22px}
 .ghost .nm i{font-size:16px}
@@ -164,6 +165,65 @@ button{cursor:pointer}
 .pinmark svg{width:13px;height:13px}
 .chip .acts.pool-acts{position:static;opacity:1}
 @media (hover:none){.seat .chip .acts{opacity:1}}
+
+/* ---------- student colors & groups ---------- */
+.chip.colored{background:var(--cc);color:var(--ci);border-color:transparent;border-left-color:rgba(255,255,255,.4)}
+.chip.colored .nm i{color:var(--ci);opacity:.85}
+.chip.colored .gb{background:var(--ci);color:var(--cc)}
+.chip.colored:hover{border-top-color:transparent;border-right-color:transparent;border-bottom-color:transparent}
+.app.painting .chip{cursor:copy}
+.app.painting .chip:not(.in-paint){opacity:.5}
+.app.painting .chip.in-paint{box-shadow:0 0 0 3px var(--ink)}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 10px;margin:-6px auto 18px;flex:none}
+.legend span{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px 14px 4px 6px;font-family:var(--display);font-weight:700;font-size:21px;color:var(--ink);line-height:1.1}
+.legend i{width:20px;height:20px;border-radius:50%;background:var(--gc);flex:none}
+.legend em{font-style:normal;font-family:var(--body);font-weight:500;font-size:14px;color:var(--muted)}
+.paintbar{display:none;align-items:center;gap:12px;padding:8px 14px;background:var(--gc);color:var(--gi);font-weight:500;font-size:14.5px}
+.paintbar.on{display:flex}
+.paintbar .msg{flex:1;min-width:0}
+.paintbar .msg span{opacity:.85;margin-left:6px}
+.paintbar .btn{background:#fff;color:#2A1A1D;border-color:transparent;height:32px}
+.spop{position:fixed;z-index:9000;width:290px;max-width:calc(100vw - 20px);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(30,5,10,.32);padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px}
+.spop[hidden]{display:none}
+.spop-head{display:flex;align-items:center;gap:10px}
+.spop-head .dot{width:26px;height:26px;border-radius:8px;background:var(--cc);border:1px solid var(--line);flex:none}
+.spop-head b{font-family:var(--display);font-size:25px;line-height:1;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spop h3,.mkgroups h3{margin:0 0 7px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.swatches{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.sw{aspect-ratio:1;border-radius:8px;border:0;background:var(--sw);padding:0;display:grid;place-items:center;color:var(--swi,#fff)}
+.sw svg{width:15px;height:15px;opacity:0}
+.sw[aria-pressed=true]{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--ink)}
+.sw[aria-pressed=true] svg{opacity:1}
+.sw.auto{background:repeating-linear-gradient(45deg,var(--seat) 0 4px,var(--line) 4px 8px);color:var(--ink)}
+.sw.custom{position:relative;cursor:pointer;background:var(--sw,conic-gradient(from 0deg,#e53935,#fbc02d,#43a047,#1e88e5,#8e24aa,#e53935))}
+.sw.custom input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.sw.custom.on{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--ink)}
+.sw.custom.on svg{opacity:1}
+.spop .x{margin-left:auto;border-color:transparent;background:transparent;flex:none}
+.spop .hint{margin-top:6px}
+.swatches.small{display:flex;flex-wrap:wrap;gap:6px}
+.swatches.small .sw{width:24px;height:24px;aspect-ratio:auto;border-radius:6px}
+.swatches.small .sw svg{width:13px;height:13px}
+.glist{display:flex;flex-direction:column;gap:4px;max-height:190px;overflow:auto}
+.gopt{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px;text-align:left;font-weight:600;font-size:14px}
+.gopt:hover{border-color:var(--accent-line)}
+.gopt .gd{width:14px;height:14px;border-radius:4px;background:var(--gc);flex:none}
+.gopt .gd.none{background:transparent;border:1.5px dashed var(--muted)}
+.gopt .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gopt .k{font-size:12.5px;color:var(--muted);font-weight:500}
+.gopt[aria-pressed=true]{border-color:var(--accent);background:var(--accent-tint)}
+.gnew{display:flex;gap:6px;margin-top:6px}
+.gnew input,.gtop input{flex:1;min-width:0;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0 10px}
+.gnew .btn{height:34px}
+.gitems{display:flex;flex-direction:column;gap:10px}
+.gitem{border:1px solid var(--line);border-left:7px solid var(--gc);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+.gtop{display:flex;gap:8px;align-items:center}
+.gtop input{background:var(--panel);font-weight:600}
+.gitem .members{font-size:13px;color:var(--muted)}
+.mkgroups{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.mkrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.mkrow input[type=number],.mkrow select{height:34px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0 8px}
+.mkrow input[type=number]{width:72px}
 
 .ghost{position:fixed;z-index:9999;pointer-events:none;width:210px;transform:translate(-50%,-50%) rotate(-2deg);box-shadow:0 14px 30px rgba(60,10,20,.35);opacity:.96}
 body.is-dragging,body.is-dragging *{cursor:grabbing!important}
@@ -200,7 +260,7 @@ dialog::backdrop{background:rgba(40,8,14,.5)}
 
 /* ---------- full screen / expanded ---------- */
 .app.expanded,.app.is-fs{position:fixed;inset:0;z-index:50}
-.app.expanded .top,.app.is-fs .top,.app.expanded .chartbar,.app.is-fs .chartbar,.app.expanded .roster,.app.is-fs .roster,.app.expanded .toolbar,.app.is-fs .toolbar,.app.expanded .statusline,.app.is-fs .statusline{display:none}
+.app.expanded .top,.app.is-fs .top,.app.expanded .chartbar,.app.is-fs .chartbar,.app.expanded .roster,.app.is-fs .roster,.app.expanded .toolbar,.app.is-fs .toolbar,.app.expanded .statusline,.app.is-fs .statusline,.app.expanded .paintbar,.app.is-fs .paintbar{display:none}
 .app.expanded .scroller,.app.is-fs .scroller{padding:8px;background:#12060A}
 .fs-exit{display:none;position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:14px;z-index:60;box-shadow:var(--shadow)}
 .app.expanded .fs-exit,.app.is-fs .fs-exit{display:inline-flex}
@@ -208,7 +268,9 @@ dialog::backdrop{background:rgba(40,8,14,.5)}
 @media print{
   html,body{height:auto;overflow:visible;background:#fff}
   :root{padding:0}
-  .top,.chartbar,.roster,.toolbar,.statusline,.fs-exit,.toast,dialog{display:none!important}
+  .top,.chartbar,.roster,.toolbar,.statusline,.fs-exit,.toast,dialog,.spop,.paintbar{display:none!important}
+  .app.painting .chip:not(.in-paint){opacity:1}
+  .app.painting .chip.in-paint{box-shadow:none}
   .app,.workspace,.stage-wrap{display:block;height:auto;position:static}
   .scroller{overflow:visible;padding:0;background:none}
   .room,.room *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -283,6 +345,10 @@ dialog::backdrop{background:rgba(40,8,14,.5)}
         </div>
         <div class="sep"></div>
         <div class="group">
+          <button class="btn" id="btnGroups" title="Create groups and give each one a color"></button>
+        </div>
+        <div class="sep"></div>
+        <div class="group">
           <button class="btn icon" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"></button>
           <button class="btn icon" id="btnRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"></button>
         </div>
@@ -303,6 +369,10 @@ dialog::backdrop{background:rgba(40,8,14,.5)}
         </div>
       </div>
 
+      <div class="paintbar" id="paintBar" role="status">
+        <div class="msg" id="paintMsg"></div>
+        <button class="btn" id="paintDone">Done</button>
+      </div>
       <div class="scroller" id="scroller">
         <div class="stage" id="stage"><div class="room" id="room"></div></div>
       </div>
@@ -389,6 +459,35 @@ dialog::backdrop{background:rgba(40,8,14,.5)}
     </div>
   </dialog>
 
+  <!-- Groups dialog -->
+  <dialog id="groupsDlg">
+    <div class="dlg">
+      <h2>Groups</h2>
+      <p>Each group has a color, and its students show that color on the chart. You can also click any student to change their color or group.</p>
+      <div class="gitems" id="gItems"></div>
+      <div><button class="btn" id="gAdd"></button></div>
+      <div class="mkgroups">
+        <h3>Make random groups</h3>
+        <div class="mkrow">Split the class into
+          <input type="number" id="mkN" min="1" max="40" value="4" aria-label="Number">
+          <select id="mkMode" aria-label="Count by">
+            <option value="count">groups</option>
+            <option value="size">students per group</option>
+          </select>
+        </div>
+        <label class="mkrow"><input type="checkbox" id="mkBal" checked> Mix boys and girls evenly across groups</label>
+        <div class="hint" id="mkHint"></div>
+        <div><button class="btn primary" id="mkGo"></button></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="gDone">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Student color & group panel -->
+  <div class="spop" id="spop" role="dialog" aria-label="Student color and group" hidden></div>
+
   <!-- Confirm dialog -->
   <dialog id="confirmDlg">
     <div class="dlg">
@@ -435,8 +534,26 @@ var I={
   csv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M4 20h16"/></svg>',
   list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>',
-  file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>'
+  file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  groups:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 015-5h2a5 5 0 015 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 014 4v2"/></svg>',
+  pick:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 7-6 2-2 6z"/><path d="M13 12l6 6"/></svg>'
 };
+
+/* ===================== student colors & groups ===================== */
+var PALETTE=[
+  {hex:'#C8102E',name:'Red'},{hex:'#E0701B',name:'Orange'},{hex:'#F2C230',name:'Yellow'},{hex:'#1F7A4D',name:'Green'},
+  {hex:'#0F8B8D',name:'Teal'},{hex:'#1F6FB5',name:'Blue'},{hex:'#7CC4F2',name:'Sky blue'},{hex:'#253B80',name:'Navy'},
+  {hex:'#7B3FA8',name:'Purple'},{hex:'#D63384',name:'Pink'},{hex:'#8B5A2B',name:'Brown'},{hex:'#5F6B73',name:'Gray'}
+];
+function hexOk(h){return /^#[0-9a-f]{6}$/i.test(h||'')}
+/* dark text on light colors, white text on dark ones */
+function inkFor(hex){
+  if(!hexOk(hex))return '#FFFFFF';
+  var n=parseInt(hex.slice(1),16), ch=[n>>16&255,n>>8&255,n&255].map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});
+  return (0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2])>0.4?'#1A1012':'#FFFFFF';
+}
 
 /* ===================== data store ===================== */
 function newChart(name){
@@ -468,6 +585,20 @@ migrateNames(store);
 function cur(){return store.charts[store.current]}
 function stuById(id){var st=cur().students;for(var i=0;i<st.length;i++)if(st[i].id===id)return st[i];return null}
 function seatOf(sid){var s=cur().seats;for(var k in s)if(s[k]===sid)return k;return null}
+function groupsOf(c){ c=c||cur(); if(!Array.isArray(c.groups))c.groups=[]; return c.groups; }
+function groupById(id){ if(!id)return null; var gs=groupsOf(); for(var i=0;i<gs.length;i++)if(gs[i].id===id)return gs[i]; return null; }
+function groupMembers(gid){ return cur().students.filter(function(s){return s.group===gid}); }
+/* a student's own color wins, then their group's color; null means the normal look */
+function colorOf(s){ if(hexOk(s.color))return s.color; var g=groupById(s.group); return g&&hexOk(g.color)?g.color:null; }
+function nextGroupColor(){
+  var used={}; groupsOf().forEach(function(g){used[g.color]=1});
+  for(var i=0;i<PALETTE.length;i++)if(!used[PALETTE[i].hex])return PALETTE[i].hex;
+  return PALETTE[groupsOf().length%PALETTE.length].hex;
+}
+function addGroup(name,color){
+  var g={id:uid('g'),name:name||('Group '+(groupsOf().length+1)),color:color||nextGroupColor()};
+  groupsOf().push(g); return g;
+}
 
 /* ---- tables ---- */
 function tableList(sizes){
@@ -554,9 +685,9 @@ function initCloud(){
 
 /* ---- undo / redo ---- */
 var undoStack=[], redoStack=[];
-function snap(){var c=cur();return JSON.stringify({students:c.students,seats:c.seats,pinned:c.pinned,pairing:c.pairing})}
+function snap(){var c=cur();return JSON.stringify({students:c.students,seats:c.seats,pinned:c.pinned,pairing:c.pairing,groups:groupsOf(c)})}
 function snapshot(){undoStack.push(snap());if(undoStack.length>60)undoStack.shift();redoStack=[];}
-function applySnap(j){var o=JSON.parse(j),c=cur();c.students=o.students;c.seats=o.seats;c.pinned=o.pinned;c.pairing=o.pairing;}
+function applySnap(j){var o=JSON.parse(j),c=cur();c.students=o.students;c.seats=o.seats;c.pinned=o.pinned;c.pairing=o.pairing;c.groups=o.groups||[];}
 function resetHistory(){undoStack=[];redoStack=[]}
 function undo(){ if(!undoStack.length)return; redoStack.push(snap()); applySnap(undoStack.pop()); commit(); }
 function redo(){ if(!redoStack.length)return; undoStack.push(snap()); applySnap(redoStack.pop()); commit(); }
@@ -586,15 +717,16 @@ function fitNames(){
   });
 }
 function chipHTML(s,where){
-  var c=cur(), pinned=!!c.pinned[s.id];
-  var cls='chip g-'+(s.g==='b'?'b':s.g==='g'?'g':'u')+(pinned?' pinned':'');
+  var c=cur(), pinned=!!c.pinned[s.id], col=colorOf(s), grp=groupById(s.group);
+  var cls='chip g-'+(s.g==='b'?'b':s.g==='g'?'g':'u')+(pinned?' pinned':'')+(col?' colored':'')+(paint&&s.group===paint?' in-paint':'');
+  var style=col?' style="--cc:'+col+';--ci:'+inkFor(col)+'"':'';
   var full=shortName(s);
   var acts= where==='seat'
     ? '<span class="acts"><button class="mini" data-act="pin" title="'+(pinned?'Unpin (auto-arrange may move this student)':'Pin to this seat (auto-arrange leaves this student here)')+'" aria-label="Pin seat">'+I.pin+'</button><button class="mini" data-act="unseat" title="Take out of seat" aria-label="Take out of seat">'+I.out+'</button></span><span class="pinmark" title="Pinned">'+I.pin+'</span>'
     : '<span class="acts pool-acts"><button class="mini" data-act="delete" title="Remove from roster" aria-label="Remove from roster">'+I.trash+'</button></span>';
-  return '<div class="'+cls+'" data-sid="'+s.id+'" data-where="'+where+'" title="'+esc(full)+' · '+gname(s.g)+'">'
+  return '<div class="'+cls+'"'+style+' tabindex="0" data-sid="'+s.id+'" data-where="'+where+'" title="'+esc(full)+' · '+gname(s.g)+(grp?' · '+esc(grp.name):'')+' · click to change color or group">'
     +'<button class="gb" data-act="gender" title="'+gname(s.g)+' (click to change)" aria-label="Gender: '+gname(s.g)+'. Click to change">'+glabel(s.g)+'</button>'
-    +'<span class="nm"><b>'+esc(shortName(s))+'</b></span>'+acts+'</div>';
+    +'<span class="nm"><b>'+esc(shortName(s))+'</b>'+(grp?'<i>'+esc(grp.name)+'</i>':'')+'</span>'+acts+'</div>';
 }
 function compat(a,b,mode){
   if(a==='?'||b==='?') return true;
@@ -634,7 +766,14 @@ function tableState(t){
   return {stus:stus,bad:bad};
 }
 function renderRoom(){
-  var c=cur(), h='<div class="board"><span>FRONT OF ROOM</span><span class="bt">'+esc(c.name)+'</span></div><div class="cols">';
+  var c=cur(), h='<div class="board"><span>FRONT OF ROOM</span><span class="bt">'+esc(c.name)+'</span></div>';
+  var gs=groupsOf(c);
+  if(gs.length){
+    h+='<div class="legend">'+gs.map(function(g){
+      return '<span style="--gc:'+g.color+'"><i></i>'+esc(g.name)+' <em>'+groupMembers(g.id).length+'</em></span>';
+    }).join('')+'</div>';
+  }
+  h+='<div class="cols">';
   for(var col=0;col<COLS;col++){
     h+='<div class="col" data-c="'+col+'"><div class="collabel">Column '+LETTERS[col]+'</div>';
     for(var r=0;r<TPC;r++){
@@ -668,6 +807,11 @@ function renderStats(){
   if(MAXSEATS>2) parts.push('<span>Larger class: some tables seat <b>'+MAXSEATS+'</b></span>');
   parts.push('<span>Tables: <b>'+bb+'</b> boy–boy · <b>'+gg+'</b> girl–girl · <b>'+mx+'</b> mixed · <b>'+solo+'</b> with one student</span>');
   if(bad) parts.push('<span class="warn">'+plural(bad,'table')+' not following the rule</span>');
+  var gs=groupsOf(c);
+  if(gs.length){
+    var ing=c.students.filter(function(s){return groupById(s.group)}).length;
+    parts.push('<span><b>'+gs.length+'</b> '+(gs.length===1?'group':'groups')+' · <b>'+(c.students.length-ing)+'</b> not in a group</span>');
+  }
   $('#stats').innerHTML=parts.join('');
 }
 function renderToolbar(){
@@ -676,7 +820,7 @@ function renderToolbar(){
   $('#btnUndo').disabled=!undoStack.length;
   $('#btnRedo').disabled=!redoStack.length;
 }
-function renderAll(){ refreshTables(); renderChartBar(); renderRoster(); renderRoom(); renderStats(); renderToolbar(); applyZoom(); if(MAXSEATS!==lastTpc){ lastTpc=MAXSEATS; fitView(); } }
+function renderAll(){ refreshTables(); renderChartBar(); renderRoster(); renderRoom(); renderStats(); renderToolbar(); renderPaint(); applyZoom(); if(MAXSEATS!==lastTpc){ lastTpc=MAXSEATS; fitView(); } if(popSid)refreshPop(); if($('#groupsDlg').open)renderGroupsDlg(); }
 
 /* static icon labels */
 $('#btnNew').innerHTML=I.plus+'New chart';
@@ -686,6 +830,9 @@ $('#btnImport').innerHTML=I.upload+'Import roster';
 $('#btnAdd').innerHTML=I.plus+'Add';
 $('#btnArrange').innerHTML=I.shuffle+'Auto-arrange';
 $('#btnClear').innerHTML=I.clear+'Clear seats';
+$('#btnGroups').innerHTML=I.groups+'Groups';
+$('#gAdd').innerHTML=I.plus+'Add a group';
+$('#mkGo').innerHTML=I.shuffle+'Make groups';
 $('#btnUndo').innerHTML=I.undo;
 $('#btnRedo').innerHTML=I.redo;
 $('#zOut').innerHTML=I.minus;
@@ -796,8 +943,10 @@ var drag=null, edgeTimer=null;
 document.addEventListener('pointerdown',function(e){
   if(e.pointerType==='mouse'&&e.button!==0)return;
   var chip=e.target.closest&&e.target.closest('.chip');
+  var wasOpen=!!(chip&&popSid===chip.dataset.sid);
+  if(popSid&&!(e.target.closest&&e.target.closest('#spop')))closePop();
   if(!chip||e.target.closest('[data-act]'))return;
-  drag={id:chip.dataset.sid,chip:chip,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,active:false,ghost:null};
+  drag={id:chip.dataset.sid,chip:chip,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,active:false,ghost:null,wasOpen:wasOpen};
 });
 document.addEventListener('pointermove',function(e){
   if(!drag)return;
@@ -844,7 +993,7 @@ function endDrag(e,cancel){
   if(!drag)return;
   var d=drag; drag=null;
   clearInterval(edgeTimer);
-  if(!d.active)return;
+  if(!d.active){ if(!cancel)chipClicked(d.id,d.chip,d.wasOpen); return; }
   d.ghost.remove();
   document.body.classList.remove('is-dragging');
   document.querySelectorAll('.seat.over,.pool.over').forEach(function(n){n.classList.remove('over')});
@@ -914,6 +1063,170 @@ $('#btnClear').onclick=function(){
 };
 $('#btnRosterToggle').onclick=function(){ app.classList.toggle('hide-roster'); setTimeout(fitView,50); };
 $('#search').addEventListener('input',renderRoster);
+
+/* ===================== student color & group popover ===================== */
+var popSid=null, paint=null;
+var spop=$('#spop');
+function chipClicked(sid,chipEl,wasOpen){
+  var s=stuById(sid); if(!s)return;
+  if(paint){
+    var g=groupById(paint); if(!g){ paint=null; renderAll(); return; }
+    snapshot(); s.group= s.group===paint ? '' : paint; commit();
+    return;
+  }
+  if(wasOpen)return;
+  openPop(sid);
+}
+function openPop(sid){ popSid=sid; refreshPop(); spop.hidden=false; positionPop(); var f=spop.querySelector('[aria-pressed=true]'); if(f)f.focus({preventScroll:true}); }
+function closePop(){ if(!popSid)return; popSid=null; spop.hidden=true; spop.innerHTML=''; }
+function popChipEl(){ return popSid&&document.querySelector('.chip[data-sid="'+popSid+'"]:not(.ghost)'); }
+function positionPop(){
+  if(!popSid)return;
+  var el=popChipEl(); if(!el)return;
+  var r=el.getBoundingClientRect(), w=spop.offsetWidth, h=spop.offsetHeight, m=10;
+  var top=r.bottom+8; if(top+h>innerHeight-m) top=Math.max(m,r.top-h-8);
+  var left=Math.min(Math.max(m,r.left),innerWidth-w-m);
+  spop.style.top=top+'px'; spop.style.left=left+'px';
+}
+function refreshPop(){
+  var s=stuById(popSid); if(!s){ closePop(); return; }
+  var g=groupById(s.group), col=colorOf(s), own=hexOk(s.color)?s.color.toUpperCase():null;
+  var inPal=own&&PALETTE.some(function(p){return p.hex===own});
+  var autoTitle=g?'Use the '+g.name+' color':'No color (normal look)';
+  var h='<div class="spop-head"><span class="dot" style="--cc:'+(col||'var(--chip)')+'"></span><b>'+esc(shortName(s))+'</b>'
+    +'<button class="btn icon x" data-pop="close" aria-label="Close">'+I.x+'</button></div>';
+  h+='<div><h3>Color</h3><div class="swatches">'
+    +'<button class="sw auto" data-pop="color" data-v="" aria-pressed="'+(!own)+'" title="'+esc(autoTitle)+'" aria-label="'+esc(autoTitle)+'">'+I.check+'</button>'
+    +PALETTE.map(function(p){return '<button class="sw" style="--sw:'+p.hex+';--swi:'+inkFor(p.hex)+'" data-pop="color" data-v="'+p.hex+'" aria-pressed="'+(own===p.hex)+'" title="'+p.name+'" aria-label="'+p.name+'">'+I.check+'</button>'}).join('')
+    +'<label class="sw custom'+(own&&!inPal?' on':'')+'" title="Pick any color"'+(own&&!inPal?' style="--sw:'+own+';--swi:'+inkFor(own)+'"':'')+'><input type="color" data-pop="custom" value="'+(own||'#C8102E').toLowerCase()+'" aria-label="Pick any color">'+I.check+'</label>'
+    +'</div>'+(g&&own?'<div class="hint">This color replaces the '+esc(g.name)+' color for this student. Pick the striped square to switch back.</div>':'')+'</div>';
+  var gs=groupsOf();
+  h+='<div><h3>Group</h3><div class="glist">'
+    +'<button class="gopt" data-pop="group" data-v="" aria-pressed="'+(!g)+'"><span class="gd none"></span><span class="n">No group</span></button>'
+    +gs.map(function(x){return '<button class="gopt" style="--gc:'+x.color+'" data-pop="group" data-v="'+x.id+'" aria-pressed="'+(g===x)+'"><span class="gd"></span><span class="n">'+esc(x.name)+'</span><span class="k">'+groupMembers(x.id).length+'</span></button>'}).join('')
+    +'</div><div class="gnew"><input type="text" id="popNewG" placeholder="New group name" maxlength="40" aria-label="New group name"><button class="btn" data-pop="newgroup">'+I.plus+'Add</button></div></div>';
+  spop.innerHTML=h;
+  positionPop();
+}
+function popNewGroup(){
+  var s=stuById(popSid); if(!s)return;
+  var inp=$('#popNewG'), nm=(inp&&inp.value.trim())||'';
+  snapshot(); var g=addGroup(nm); s.group=g.id; commit();
+  toast('Made '+g.name+' and added '+shortName(s)+'.');
+}
+spop.addEventListener('click',function(e){
+  var b=e.target.closest('[data-pop]'); if(!b||b.tagName==='INPUT')return;
+  var s=stuById(popSid); if(!s)return;
+  var a=b.dataset.pop;
+  if(a==='close'){ closePop(); return; }
+  if(a==='color'){
+    var v=b.dataset.v; if((s.color||'')===v)return;
+    snapshot(); if(v)s.color=v; else delete s.color; commit();
+  } else if(a==='group'){
+    if((s.group||'')===b.dataset.v)return;
+    snapshot(); s.group=b.dataset.v; commit();
+  } else if(a==='newgroup') popNewGroup();
+});
+spop.addEventListener('change',function(e){
+  if(e.target.dataset.pop!=='custom')return;
+  var s=stuById(popSid), v=e.target.value.toUpperCase(); if(!s||!hexOk(v))return;
+  snapshot(); s.color=v; commit();
+});
+spop.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.id==='popNewG'){ e.preventDefault(); popNewGroup(); }
+});
+scroller.addEventListener('scroll',positionPop);
+window.addEventListener('resize',positionPop);
+/* keyboard: Enter or Space on a focused student opens the panel */
+document.addEventListener('keydown',function(e){
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('chip')){
+    e.preventDefault(); chipClicked(e.target.dataset.sid,e.target,popSid===e.target.dataset.sid);
+  }
+});
+
+/* ===================== add-students-to-a-group mode ===================== */
+function renderPaint(){
+  var g=paint&&groupById(paint); if(paint&&!g)paint=null;
+  app.classList.toggle('painting',!!g);
+  var bar=$('#paintBar'); bar.classList.toggle('on',!!g);
+  if(!g)return;
+  bar.style.setProperty('--gc',g.color); bar.style.setProperty('--gi',inkFor(g.color));
+  $('#paintMsg').innerHTML='Adding students to <b>'+esc(g.name)+'</b>. Click a student to add or remove them.<span>'+plural(groupMembers(g.id).length,'student')+' so far</span>';
+}
+function startPaint(gid){ closePop(); paint=gid; renderAll(); }
+$('#paintDone').onclick=function(){ paint=null; renderAll(); };
+
+/* ===================== groups dialog ===================== */
+function groupPlan(){
+  var n=cur().students.length, N=Math.max(1,parseInt($('#mkN').value,10)||1);
+  var k= $('#mkMode').value==='count' ? Math.min(N,n) : Math.ceil(n/N);
+  return {n:n,k:Math.max(0,k)};
+}
+function renderMkHint(){
+  var p=groupPlan(), el=$('#mkHint');
+  if(!p.n){ el.textContent='Add students first.'; $('#mkGo').disabled=true; return; }
+  $('#mkGo').disabled=false;
+  var lo=Math.floor(p.n/p.k), hi=Math.ceil(p.n/p.k);
+  el.textContent=plural(p.n,'student')+' → '+plural(p.k,'group')+' of '+(lo===hi?lo:lo+'–'+hi)+'.'+(groupsOf().length?' This replaces your current groups.':'');
+}
+function renderGroupsDlg(){
+  var gs=groupsOf(), box=$('#gItems');
+  box.innerHTML= gs.length ? gs.map(function(g){
+    var m=groupMembers(g.id);
+    return '<div class="gitem" style="--gc:'+g.color+'" data-gid="'+g.id+'">'
+      +'<div class="gtop"><input type="text" data-g="name" value="'+esc(g.name)+'" maxlength="40" aria-label="Group name">'
+      +'<button class="btn" data-g="paint" title="Click students on the chart to add them to this group">'+I.pick+'Add students</button>'
+      +'<button class="btn icon danger" data-g="del" title="Delete this group" aria-label="Delete '+esc(g.name)+'">'+I.trash+'</button></div>'
+      +'<div class="swatches small">'+PALETTE.map(function(p){return '<button class="sw" style="--sw:'+p.hex+';--swi:'+inkFor(p.hex)+'" data-g="color" data-v="'+p.hex+'" aria-pressed="'+(g.color===p.hex)+'" title="'+p.name+'" aria-label="'+p.name+'">'+I.check+'</button>'}).join('')+'</div>'
+      +'<div class="members">'+(m.length?plural(m.length,'student')+': '+m.map(function(s){return esc(shortName(s))}).join(', '):'No students yet. Press Add students, or click a student on the chart.')+'</div></div>';
+  }).join('') : '<p class="hint">No groups yet. Add one below, or let the app make random groups for you.</p>';
+  renderMkHint();
+}
+$('#btnGroups').onclick=function(){ closePop(); renderGroupsDlg(); $('#groupsDlg').showModal(); };
+$('#gDone').onclick=function(){ $('#groupsDlg').close(); };
+$('#gAdd').onclick=function(){
+  snapshot(); var g=addGroup(); commit();
+  var inp=document.querySelector('.gitem[data-gid="'+g.id+'"] input'); if(inp){ inp.focus(); inp.select(); }
+};
+$('#gItems').addEventListener('click',function(e){
+  var b=e.target.closest('[data-g]'); if(!b||b.tagName==='INPUT')return;
+  var g=groupById(b.closest('.gitem').dataset.gid); if(!g)return;
+  var a=b.dataset.g;
+  if(a==='color'){ if(g.color===b.dataset.v)return; snapshot(); g.color=b.dataset.v; commit(); }
+  else if(a==='paint'){ $('#groupsDlg').close(); startPaint(g.id); }
+  else if(a==='del'){
+    snapshot();
+    cur().groups=groupsOf().filter(function(x){return x!==g});
+    cur().students.forEach(function(s){ if(s.group===g.id)s.group=''; });
+    commit(); toast('Deleted '+g.name+'.','Undo',undo);
+  }
+});
+$('#gItems').addEventListener('change',function(e){
+  if(e.target.dataset.g!=='name')return;
+  var g=groupById(e.target.closest('.gitem').dataset.gid), v=e.target.value.trim();
+  if(!g||!v||v===g.name){ if(g)e.target.value=g.name; return; }
+  snapshot(); g.name=v; commit();
+});
+$('#gItems').addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target.dataset.g==='name')e.target.blur(); });
+$('#mkN').addEventListener('input',renderMkHint);
+$('#mkMode').addEventListener('change',renderMkHint);
+function makeGroups(){
+  var c=cur(), p=groupPlan(); if(!p.n||!p.k)return;
+  snapshot();
+  c.groups=[];
+  var gs=[]; for(var i=0;i<p.k;i++)gs.push(addGroup('Group '+(i+1),PALETTE[i%PALETTE.length].hex));
+  var order= $('#mkBal').checked
+    ? shuffle(c.students.filter(function(s){return s.g==='b'})).concat(shuffle(c.students.filter(function(s){return s.g==='g'})),shuffle(c.students.filter(function(s){return s.g==='?'})))
+    : shuffle(c.students);
+  var start=Math.floor(Math.random()*p.k);
+  order.forEach(function(s,i){ s.group=gs[(start+i)%p.k].id; });
+  commit();
+  toast('Made '+plural(p.k,'group')+'.','Undo',undo);
+}
+$('#mkGo').onclick=function(){
+  if(!groupsOf().length){ makeGroups(); return; }
+  confirmBox('Replace your groups?','This removes the current groups and makes new random ones. You can undo this.','Make groups').then(function(ok){ if(ok)makeGroups(); });
+};
 
 /* ===================== auto-arrange ===================== */
 function autoArrange(){
@@ -1041,7 +1354,8 @@ function createChart(){
   var nm=$('#newName').value.trim()||'Untitled chart';
   var copy=document.querySelector('input[name=newFrom]:checked').value==='copy';
   var src=cur(), c=newChart(nm);
-  if(copy) c.students=JSON.parse(JSON.stringify(src.students)); c.pairing=src.pairing;
+  if(copy){ c.students=JSON.parse(JSON.stringify(src.students)); c.groups=JSON.parse(JSON.stringify(groupsOf(src))); }
+  c.pairing=src.pairing;
   store.charts[c.id]=c; store.order.push(c.id); store.current=c.id;
   $('#newDlg').close(); resetHistory(); commit(); fitView();
 }
@@ -1273,16 +1587,17 @@ $('#impGo').onclick=function(){
 
 /* ===================== CSV export ===================== */
 $('#btnCsv').onclick=function(){
-  var c=cur(), rows=[['Table','Seat','Last initial','First name','Gender']];
+  var c=cur(), rows=[['Table','Seat','Last initial','First name','Gender','Group']];
+  var gn=function(s){var g=groupById(s.group);return g?g.name:''};
   var q=function(v){v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   var seatedIds={};
   TABLES.forEach(function(t){
     t.seats.forEach(function(sid,i){
       var s=stuById(c.seats[sid]);
-      if(s){ seatedIds[s.id]=1; rows.push([t.id,'Seat '+(i+1),s.last,s.first,gname(s.g)]); }
+      if(s){ seatedIds[s.id]=1; rows.push([t.id,'Seat '+(i+1),s.last,s.first,gname(s.g),gn(s)]); }
     });
   });
-  c.students.forEach(function(s){ if(!seatedIds[s.id])rows.push(['','',s.last,s.first,gname(s.g)]); });
+  c.students.forEach(function(s){ if(!seatedIds[s.id])rows.push(['','',s.last,s.first,gname(s.g),gn(s)]); });
   var csv=rows.map(function(r){return r.map(q).join(',')}).join('\r\n');
   var fname=(c.name.replace(/[^\w\- ]+/g,'').trim()||'seating-chart')+'.csv';
   waitForClaude(200).then(function(cl){
@@ -1349,7 +1664,8 @@ function buildPdf(JsPDF){
   var title='FRONT OF ROOM   |   '+c.name;
   fitText(doc,title,W-2*M-24,20,10);
   doc.text(title,W/2,M+26,{align:'center'});
-  var top=M+40+12, labH=18, footH=30;
+  var gs=groupsOf(c);
+  var top=M+40+12, labH=18, footH=gs.length?46:30;
   var colW=(W-2*M-3*GX)/4, gridTop=top+labH+6, availH=H-M-footH-gridTop;
   var sr=Math.ceil(MAXSEATS/2); var tH=Math.min(20+sr*54+(sr-1)*4,(availH-(TPC-1)*GY)/TPC);
   for(var col=0;col<COLS;col++){
@@ -1368,8 +1684,9 @@ function buildPdf(JsPDF){
         var rowI=Math.floor(s/2), inRow=Math.min(2,t.seats.length-rowI*2);
         var sx=x+6+(inRow===1?(sw+4)/2:(s%2)*(sw+4)), sy=y+16+rowI*(sh+4), stu=stuById(c.seats[t.seats[s]]);
         if(stu){
-          doc.setFillColor(cc); doc.roundedRect(sx,sy,sw,sh,4,4,'F');
-          doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
+          var fill=colorOf(stu)||cc;
+          doc.setFillColor(fill); doc.roundedRect(sx,sy,sw,sh,4,4,'F');
+          doc.setTextColor(inkFor(fill)); doc.setFont('helvetica','bold');
           var nm=shortName(stu); fitText(doc,nm,sw-8,16,6);
           doc.text(nm,sx+sw/2,sy+sh/2,{align:'center',baseline:'middle'});
         } else {
@@ -1381,6 +1698,17 @@ function buildPdf(JsPDF){
   }
   var seated={}; for(var k in c.seats)seated[c.seats[k]]=1;
   var un=c.students.filter(function(s){return !seated[s.id]}).map(shortName).join(', ');
+  if(gs.length){
+    var lx=M, ly=H-M-24;
+    doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    gs.forEach(function(g){
+      var lbl=g.name+' ('+groupMembers(g.id).length+')', lw=doc.getTextWidth(lbl);
+      if(lx+14+lw>W-M){ lx=M; ly-=13; }
+      doc.setFillColor(g.color); doc.roundedRect(lx,ly-7,9,9,2,2,'F');
+      doc.setTextColor(60); doc.text(lbl,lx+13,ly);
+      lx+=13+lw+16;
+    });
+  }
   doc.setTextColor(110); doc.setFont('helvetica','normal'); doc.setFontSize(8);
   doc.text('Mr. Williams Seating Chart Maker  -  '+new Date().toLocaleDateString(),M,H-M+2);
   if(un){ var line='Not seated: '+un; fitText(doc,line,W-2*M,8,5); doc.text(line,M,H-M-9); }
@@ -1407,6 +1735,8 @@ $('#btnPdf').onclick=function(){
 document.addEventListener('keydown',function(e){
   var tag=(e.target.tagName||'').toLowerCase();
   var typing=tag==='input'||tag==='textarea'||tag==='select';
+  if(e.key==='Escape'&&popSid){ var back=popChipEl(); closePop(); if(back)back.focus(); return; }
+  if(e.key==='Escape'&&paint&&!document.querySelector('dialog[open]')){ paint=null; renderAll(); return; }
   if(e.key==='Escape'&&app.classList.contains('expanded')&&!document.querySelector('dialog[open]')){ setExpanded(false); return; }
   if(typing||document.querySelector('dialog[open]'))return;
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
